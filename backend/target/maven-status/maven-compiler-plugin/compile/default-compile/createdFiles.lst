@@ -6,6 +6,7 @@ com\campusone\dto\FileDTO.class
 com\campusone\model\Course$CourseBuilder.class
 com\campusone\model\Attendance$AttendanceBuilder.class
 com\campusone\service\BulkImportService$BulkImportResult.class
+com\campusone\service\CourseService$CourseImportResult$ImportError.class
 com\campusone\repository\RoomRepository.class
 com\campusone\dto\UserResponse$UserResponseBuilder.class
 com\campusone\util\JwtUtil.class
@@ -44,8 +45,10 @@ com\campusone\dto\TimetableRequest$TimetableRequestBuilder.class
 com\campusone\dto\CreateUserRequest.class
 com\campusone\service\FileService.class
 com\campusone\service\TimetableService.class
+com\campusone\controller\AdminCourseOfferingController.class
 com\campusone\service\CourseOfferingService.class
 com\campusone\repository\EnrollmentRepository.class
+com\campusone\controller\AdminCourseController.class
 com\campusone\model\Room.class
 com\campusone\repository\DepartmentRepository.class
 com\campusone\service\NotificationService.class
@@ -53,6 +56,7 @@ com\campusone\model\UserStatus.class
 com\campusone\repository\TaskSubmissionRepository.class
 com\campusone\model\User$UserBuilder.class
 com\campusone\model\Room$RoomBuilder.class
+com\campusone\controller\TaskController.class
 com\campusone\service\CourseService.class
 com\campusone\model\TaskSubmission.class
 com\campusone\controller\AuthController.class
@@ -75,6 +79,8 @@ com\campusone\controller\TimetableController.class
 com\campusone\exception\ResourceNotFoundException.class
 com\campusone\model\Semester$SemesterBuilder.class
 com\campusone\model\UserNotification$UserNotificationBuilder.class
+com\campusone\controller\AdminTimetableController.class
+com\campusone\controller\StudentController.class
 com\campusone\CampusOneApplication.class
 com\campusone\service\JwtService.class
 com\campusone\controller\AdminBulkImportController.class
@@ -83,6 +89,7 @@ com\campusone\repository\NotificationRepository.class
 com\campusone\service\StudentService.class
 com\campusone\dto\EnrollmentDTO.class
 com\campusone\model\Task$TaskBuilder.class
+com\campusone\config\DataSeeder$DepartmentSeed.class
 com\campusone\dto\ResetPasswordRequest.class
 com\campusone\model\Course.class
 com\campusone\repository\UserNotificationRepository.class
@@ -117,10 +124,12 @@ com\campusone\model\Attendance.class
 com\campusone\repository\TimetableEntryRepository.class
 com\campusone\service\BulkImportService$1.class
 com\campusone\dto\UpdateUserRequest.class
+com\campusone\service\CourseService$CourseImportResult.class
 com\campusone\model\Department$DepartmentBuilder.class
 com\campusone\model\Program$ProgramBuilder.class
 com\campusone\model\Role.class
 com\campusone\model\User.class
+com\campusone\controller\AdminUserController.class
 com\campusone\repository\UserRepository.class
 com\campusone\controller\AdminController.class
 com\campusone\service\FileService$1.class

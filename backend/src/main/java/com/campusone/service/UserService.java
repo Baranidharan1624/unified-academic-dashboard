@@ -23,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     /**
      * Create a new user
@@ -47,6 +48,20 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        String userIdentifier = savedUser.getStudentId() != null
+            ? savedUser.getStudentId()
+            : savedUser.getEmployeeId() != null
+                ? savedUser.getEmployeeId()
+                : String.valueOf(savedUser.getId());
+
+        emailService.sendAccountCreatedEmail(
+            savedUser.getFullName(),
+            savedUser.getEmail(),
+            userIdentifier,
+            request.getPassword()
+        );
+
         return mapToResponse(savedUser);
     }
 

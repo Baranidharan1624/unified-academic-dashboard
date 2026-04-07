@@ -26,6 +26,15 @@ export const authService = {
   },
 
   /**
+   * Get current authenticated user from the backend
+   * @returns {Promise<Object>} current user profile
+   */
+  async me() {
+    const response = await api.get("/auth/me");
+    return response.data;
+  },
+
+  /**
    * Logout user - clear local storage
    */
   logout() {

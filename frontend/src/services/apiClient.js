@@ -50,8 +50,9 @@ apiClient.interceptors.response.use(
         localStorage.removeItem("user");
         window.location.href = "/login";
       } else if (status === 403) {
-        // Forbidden
-        console.error("Access denied:", data?.message || "You don't have permission");
+        // Forbidden - keep user signed in and surface the access error.
+        const accessMessage = data?.message || data?.error || "You don't have permission";
+        console.error("Access denied:", accessMessage);
       } else if (status === 404) {
         // Not found
         console.error("Resource not found:", data?.message);

@@ -15,7 +15,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.login.url:http://localhost:5173/login}")
+    @Value("${app.login.url:http://10.65.11.65:5173/login}")
     private String loginUrl;
 
     @Async

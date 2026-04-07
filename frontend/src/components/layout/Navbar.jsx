@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import NotificationBell from '../NotificationBell';
 import '../../assets/css/navbar.css';
 
-function Navbar({ onMenuToggle, title }) {
+function Navbar({ onMenuToggle, title, sidebarOpen = false }) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -39,11 +39,13 @@ function Navbar({ onMenuToggle, title }) {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <button className="menu-toggle" onClick={onMenuToggle} aria-label="Toggle menu">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
+        {!sidebarOpen && (
+          <button className="menu-toggle" onClick={onMenuToggle} aria-label="Toggle menu">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        )}
         <h2 className="navbar-title">{title || 'Dashboard'}</h2>
       </div>
       <div className="navbar-search">

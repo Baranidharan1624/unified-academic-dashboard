@@ -11,14 +11,39 @@ export function AuthProvider({ children }) {
   // Initialize user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser && token) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem("user");
-      }
+    if (!storedUser || !token) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    let parsedUser = null;
+    try {
+      parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+    } catch (e) {
+      localStorage.removeItem("user");
+      setLoading(false);
+      return;
+    }
+
+    authService.me()
+      .then((currentUser) => {
+        const normalizedUser = {
+          id: currentUser.userId,
+          email: currentUser.email,
+          role: currentUser.role,
+          name: currentUser.fullName ?? currentUser.name,
+        };
+
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
+        setUser(normalizedUser);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, [token]);
 
   /**

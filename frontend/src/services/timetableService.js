@@ -1,5 +1,16 @@
 import apiClient from './apiClient';
 
+const getCurrentUserId = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+};
+
 // Room Services
 export const getRooms = async () => {
   const response = await apiClient.get('/admin/rooms');
@@ -49,13 +60,15 @@ export const deleteTimetableEntry = async (id) => {
 
 // Faculty Timetable
 export const getFacultyTimetable = async () => {
-  const response = await apiClient.get('/faculty/timetable');
+  const userId = getCurrentUserId();
+  const response = await apiClient.get(`/timetable/faculty/${userId || 0}`);
   return response.data;
 };
 
 // Student Timetable
 export const getStudentTimetable = async () => {
-  const response = await apiClient.get('/student/timetable');
+  const userId = getCurrentUserId();
+  const response = await apiClient.get(`/timetable/student/${userId || 0}`);
   return response.data;
 };
 

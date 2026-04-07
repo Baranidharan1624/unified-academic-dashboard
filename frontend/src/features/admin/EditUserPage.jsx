@@ -7,7 +7,7 @@ import "../../assets/css/dashboard.css";
 function EditUserPage() {
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     role: "STUDENT",
     department: "",
@@ -30,7 +30,7 @@ function EditUserPage() {
       setFetching(true);
       const user = await userService.getUserById(id);
       setFormData({
-        name: user.name || "",
+        fullName: user.fullName || user.name || "",
         email: user.email || "",
         role: user.role || "STUDENT",
         department: user.department || "",
@@ -56,7 +56,7 @@ function EditUserPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || formData.name.length < 2) {
+    if (!formData.fullName || formData.fullName.length < 2) {
       setError("Name must be at least 2 characters");
       return;
     }
@@ -70,7 +70,7 @@ function EditUserPage() {
 
     try {
       const userData = {
-        name: formData.name,
+        fullName: formData.fullName,
         email: formData.email,
         role: formData.role,
         department: formData.department || null,
@@ -111,12 +111,12 @@ function EditUserPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="name">Full Name</label>
+                <label htmlFor="fullName">Full Name</label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
                   className="form-input"
                   required

@@ -94,9 +94,7 @@ function LoginPage() {
         
         <div className="login-hints">
           <p>Demo Accounts:</p>
-          <small>admin@campusone.com / admin123</small><br />
-          <small>faculty@campusone.com / faculty123</small><br />
-          <small>student@campusone.com / student123</small>
+          <small>admin.ops@campusone.edu / 123</small>
         </div>
       </div>
     </div>

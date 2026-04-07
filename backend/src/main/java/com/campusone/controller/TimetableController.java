@@ -17,6 +17,16 @@ public class TimetableController {
 
     private final TimetableService timetableService;
 
+    @GetMapping
+    public ResponseEntity<List<TimetableEntryDTO>> getAllTimetable() {
+        return ResponseEntity.ok(timetableService.getAllTimetableEntries());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TimetableEntryDTO> getTimetableById(@PathVariable Long id) {
+        return ResponseEntity.ok(timetableService.getTimetableEntryById(id));
+    }
+
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<TimetableEntryDTO>> getStudentTimetable(@PathVariable Long studentId) {
         return ResponseEntity.ok(timetableService.getStudentTimetable(studentId));

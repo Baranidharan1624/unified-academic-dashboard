@@ -23,4 +23,8 @@ public class UserResponse {
     private String academicYear;
     private UserStatus status;
     private LocalDateTime createdAt;
+
+    public String getName() {
+        return fullName;
+    }
 }

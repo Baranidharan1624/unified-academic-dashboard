@@ -9,7 +9,7 @@ import "../../assets/css/dashboard.css";
  */
 function CreateUserPage() {
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,7 +35,7 @@ function CreateUserPage() {
   };
 
   const validateForm = () => {
-    if (!formData.name || formData.name.length < 2) {
+    if (!formData.fullName || formData.fullName.length < 2) {
       setError("Name must be at least 2 characters");
       return false;
     }
@@ -64,7 +64,7 @@ function CreateUserPage() {
 
     try {
       const userData = {
-        name: formData.name,
+        fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
         role: formData.role,
@@ -98,12 +98,12 @@ function CreateUserPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="name">Full Name *</label>
+                <label htmlFor="fullName">Full Name *</label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Enter full name"
                   className="form-input"

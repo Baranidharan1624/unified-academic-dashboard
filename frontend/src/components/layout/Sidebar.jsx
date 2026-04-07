@@ -127,8 +127,8 @@ function Sidebar({ role = 'ADMIN', isOpen = false, onClose }) {
   };
 
   const handleNavClick = () => {
-    // Close sidebar on mobile when clicking a nav item
-    if (window.innerWidth <= 768 && onClose) {
+    // Always close sidebar when selecting a nav item.
+    if (onClose) {
       onClose();
     }
   };
@@ -141,7 +141,7 @@ function Sidebar({ role = 'ADMIN', isOpen = false, onClose }) {
 
   return (
     <>
-      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <LogoIcon />

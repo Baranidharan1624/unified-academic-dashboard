@@ -24,6 +24,7 @@ D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\dto\UserResponse.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\UserStatus.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\Enrollment.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\AdminTimetableController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\dto\ProgramDTO.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\NotificationService.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\TaskService.java
@@ -37,9 +38,12 @@ D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\TimetableEntry.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\EmailService.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\NotificationController.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\AdminCourseController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\exception\GlobalExceptionHandler.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\AdminCourseOfferingController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\UserNotification.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\StudentService.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\AdminUserController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\dto\ResetPasswordRequest.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\Timetable.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\repository\EnrollmentRepository.java
@@ -69,6 +73,7 @@ D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\dto\TimetableEntryDTO.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\CampusOneApplication.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\config\SecurityConfig.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\TaskController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\dto\RoomDTO.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\CustomUserDetailsService.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\repository\AttendanceRepository.java
@@ -85,5 +90,6 @@ D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\service\UserService.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\model\FileMetadata.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\repository\UserNotificationRepository.java
+D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\controller\StudentController.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\repository\TaskRepository.java
 D:\projects\unified-academic-dashboard-Hari\backend\src\main\java\com\campusone\repository\ProgramRepository.java

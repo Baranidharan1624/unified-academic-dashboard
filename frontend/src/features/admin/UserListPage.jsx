@@ -86,7 +86,7 @@ function UserListPage() {
   const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      user.name?.toLowerCase().includes(searchLower) ||
+      (user.fullName || user.name)?.toLowerCase().includes(searchLower) ||
       user.email?.toLowerCase().includes(searchLower) ||
       user.role?.toLowerCase().includes(searchLower) ||
       user.department?.toLowerCase().includes(searchLower)
@@ -192,7 +192,7 @@ function UserListPage() {
                 ) : (
                   filteredUsers.map((user) => (
                     <tr key={user.id}>
-                      <td>{user.name}</td>
+                      <td>{user.fullName || user.name}</td>
                       <td>{user.email}</td>
                       <td>{getRoleBadge(user.role)}</td>
                       <td>{getStatusBadge(user.status)}</td>
@@ -253,7 +253,7 @@ function UserListPage() {
             <div className="modal-content glass-card" onClick={(e) => e.stopPropagation()}>
               <h2>Reset Password</h2>
               <p>
-                Resetting password for: <strong>{selectedUser?.name}</strong>
+                Resetting password for: <strong>{selectedUser?.fullName || selectedUser?.name}</strong>
               </p>
               <div className="form-group">
                 <label>New Password</label>

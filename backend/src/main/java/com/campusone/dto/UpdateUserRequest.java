@@ -1,6 +1,7 @@
 package com.campusone.dto;
 
 import com.campusone.model.Role;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserRequest {
+    @JsonAlias("name")
     private String fullName;
     
     @Email(message = "Invalid email format")
