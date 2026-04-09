@@ -120,16 +120,13 @@ function RoomManagementPage() {
           
           <div className="form-group">
             <label>Building</label>
-            <select
+            <input
+              type="text"
               value={formData.building}
               onChange={(e) => setFormData({...formData, building: e.target.value})}
+              placeholder="e.g., Main Building"
               required
-            >
-              <option value="">Select Building</option>
-              <option value="Main Building">Main Building</option>
-              <option value="Science Block">Science Block</option>
-              <option value="Arts Block">Arts Block</option>
-            </select>
+            />
           </div>
 
           <div className="form-group">

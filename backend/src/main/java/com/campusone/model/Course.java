@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "courses")
+@Table(name = "courses", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"course_code", "semester", "department_id"})
+})
 public class Course {
 
     @Id
@@ -23,7 +25,7 @@ public class Course {
     @Column(nullable = false)
     private String courseName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String courseCode;
 
     @Column(columnDefinition = "TEXT")
@@ -38,6 +40,9 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_id")
     private User faculty;
+
+    @Enumerated(EnumType.STRING)
+    private CourseType type;
 
     @Column(nullable = false)
     private Integer semester;
@@ -59,5 +64,8 @@ public class Course {
     @PrePersist
     void onCreate() {
         createdAt = LocalDateTime.now();
+        if (type == null) {
+            type = CourseType.THEORY;
+        }
     }
 }

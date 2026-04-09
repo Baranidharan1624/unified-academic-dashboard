@@ -42,6 +42,11 @@ public class TimetableController {
         return ResponseEntity.status(HttpStatus.CREATED).body(timetableService.createTimetable(request));
     }
 
+    @PostMapping("/generate")
+    public ResponseEntity<List<TimetableEntryDTO>> generateAutomaticTimetable() {
+        return ResponseEntity.ok(timetableService.generateAutomaticTimetable());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TimetableEntryDTO> updateTimetable(@PathVariable Long id, @RequestBody TimetableRequest request) {
         return ResponseEntity.ok(timetableService.updateTimetable(id, request));

@@ -21,6 +21,11 @@ export const userService = {
     return response.data;
   },
 
+  async getCreateMeta() {
+    const response = await api.get("/admin/users/meta");
+    return response.data;
+  },
+
   /**
    * Get users by role
    * @param {string} role - Role filter (ADMIN, FACULTY, STUDENT)

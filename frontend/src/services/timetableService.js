@@ -58,6 +58,11 @@ export const deleteTimetableEntry = async (id) => {
   return response.data;
 };
 
+export const generateAutomaticTimetable = async () => {
+  const response = await apiClient.post('/admin/timetable/generate');
+  return response.data;
+};
+
 // Faculty Timetable
 export const getFacultyTimetable = async () => {
   const userId = getCurrentUserId();
@@ -96,8 +101,8 @@ export default {
   createTimetableEntry,
   updateTimetableEntry,
   deleteTimetableEntry,
+  generateAutomaticTimetable,
   getFacultyTimetable,
   getStudentTimetable,
   organizeTimetableByDay
 };
-

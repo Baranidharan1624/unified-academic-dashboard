@@ -17,7 +17,10 @@ public class CourseController {
     private final CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<List<CourseDTO>> getCourses() {
+    public ResponseEntity<List<CourseDTO>> getCourses(@RequestParam(name = "faculty", required = false) Long facultyId) {
+        if (facultyId != null) {
+            return ResponseEntity.ok(courseService.getFacultyCourses(facultyId));
+        }
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 

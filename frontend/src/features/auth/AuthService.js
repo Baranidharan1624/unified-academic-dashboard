@@ -8,7 +8,7 @@ export const authService = {
    * Login user with email and password
    * @param {string} email 
    * @param {string} password 
-   * @returns {Promise} Login response with token and user data
+   * @returns {Promise} Login response with user data
    */
   async login(email, password) {
     const response = await api.post("/auth/login", { email, password });
@@ -26,19 +26,9 @@ export const authService = {
   },
 
   /**
-   * Get current authenticated user from the backend
-   * @returns {Promise<Object>} current user profile
-   */
-  async me() {
-    const response = await api.get("/auth/me");
-    return response.data;
-  },
-
-  /**
    * Logout user - clear local storage
    */
   logout() {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
   },
 
@@ -52,21 +42,12 @@ export const authService = {
   },
 
   /**
-   * Get JWT token from local storage
-   * @returns {string|null} Token or null
-   */
-  getToken() {
-    return localStorage.getItem("token");
-  },
-
-  /**
    * Check if user is authenticated
    * @returns {boolean}
    */
   isAuthenticated() {
-    const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
-    return !!token && !!user;
+    return !!user;
   },
 
   /**
@@ -80,7 +61,6 @@ export const authService = {
       name: data.fullName ?? data.name,
       role: data.role,
     };
-    localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(user));
   },
 };

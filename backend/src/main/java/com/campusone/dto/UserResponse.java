@@ -21,6 +21,15 @@ public class UserResponse {
     private String department;
     private Integer semester;
     private String academicYear;
+    private String section;
+    private String registrationNumber;
+    private String facultyId;
+    private String courseHandling;
+    private String designation;
+    private Integer age;
+    private String mobileNumber;
+    private String address;
+    private String bloodGroup;
     private UserStatus status;
     private LocalDateTime createdAt;
 

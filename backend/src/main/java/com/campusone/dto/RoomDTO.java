@@ -24,6 +24,10 @@ public class RoomDTO {
 
     private Integer capacity;
     private String roomType;
+    private String assignedDepartment;
+    private Integer assignedSemester;
+    private String assignedSection;
+    private String assignedCourseCode;
     private Boolean isAvailable;
     private String createdAt;
 

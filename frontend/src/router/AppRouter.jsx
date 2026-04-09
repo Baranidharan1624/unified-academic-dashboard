@@ -5,9 +5,14 @@ import RegisterPage from "../features/auth/RegisterPage";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import StudentManagement from "../pages/admin/StudentManagement";
-import StaffManagement from "../pages/admin/StaffManagement";
+import FacultyManagement from "../pages/admin/FacultyManagement";
+import CreateStudentPage from "../pages/admin/CreateStudentPage";
+import CreateFacultyPage from "../pages/admin/CreateFacultyPage";
+import ImportStudentsPage from "../pages/admin/ImportStudentsPage";
+import ImportFacultyPage from "../pages/admin/ImportFacultyPage";
 import CourseManagement from "../pages/admin/CourseManagement";
 import TimetableManagement from "../pages/admin/TimetableManagement";
+import TimetableGenerationPage from "../pages/admin/TimetableGenerationPage";
 import SendNotification from "../pages/admin/SendNotification";
 import Reports from "../pages/admin/Reports";
 
@@ -43,9 +48,14 @@ function AppRouter() {
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/students" element={<ProtectedRoute allowedRoles={["ADMIN"]}><StudentManagement /></ProtectedRoute>} />
-        <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={["ADMIN"]}><StaffManagement /></ProtectedRoute>} />
+        <Route path="/admin/students/create" element={<ProtectedRoute allowedRoles={["ADMIN"]}><CreateStudentPage /></ProtectedRoute>} />
+        <Route path="/admin/students/import" element={<ProtectedRoute allowedRoles={["ADMIN"]}><ImportStudentsPage /></ProtectedRoute>} />
+        <Route path="/admin/faculty" element={<ProtectedRoute allowedRoles={["ADMIN"]}><FacultyManagement /></ProtectedRoute>} />
+        <Route path="/admin/faculty/create" element={<ProtectedRoute allowedRoles={["ADMIN"]}><CreateFacultyPage /></ProtectedRoute>} />
+        <Route path="/admin/faculty/import" element={<ProtectedRoute allowedRoles={["ADMIN"]}><ImportFacultyPage /></ProtectedRoute>} />
         <Route path="/admin/courses" element={<ProtectedRoute allowedRoles={["ADMIN"]}><CourseManagement /></ProtectedRoute>} />
         <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={["ADMIN"]}><TimetableManagement /></ProtectedRoute>} />
+        <Route path="/admin/timetable/generate" element={<ProtectedRoute allowedRoles={["ADMIN"]}><TimetableGenerationPage /></ProtectedRoute>} />
         <Route path="/admin/timetable-new" element={<ProtectedRoute allowedRoles={["ADMIN"]}><TimetableManagementPage /></ProtectedRoute>} />
         <Route path="/admin/rooms" element={<ProtectedRoute allowedRoles={["ADMIN"]}><RoomManagementPage /></ProtectedRoute>} />
         <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={["ADMIN"]}><SendNotification /></ProtectedRoute>} />

@@ -1,105 +1,144 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import { userService } from "../../services/userService";
-import { api } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
 
 function StudentManagement() {
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [excelFile, setExcelFile] = useState(null);
+  const [meta, setMeta] = useState({ departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] });
+  const [students, setStudents] = useState([]);
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [registerSortDirection, setRegisterSortDirection] = useState(null);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const actionMenuRef = useRef(null);
+  const [statusUpdating, setStatusUpdating] = useState(null);
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    studentId: "",
-    fullName: "",
-    email: "",
-    department: "",
-    semester: "",
-    password: ""
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await userService.createUser({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: "STUDENT",
-        department: formData.department,
-        semester: parseInt(formData.semester) || null,
-        academicYear: new Date().getFullYear().toString()
-      });
-      
-      setSuccess("Student created successfully! An email has been sent with login credentials.");
-      setFormData({
-        studentId: "",
-        fullName: "",
-        email: "",
-        department: "",
-        semester: "",
-        password: ""
-      });
-      setShowForm(false);
-    } catch (err) {
-      setError(err.response?.data?.error || err.message || "Failed to create student");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleExcelUpload = async () => {
-    if (!excelFile) {
-      setError("Please select an Excel file first");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", excelFile);
-      formData.append("userType", "student");
-
-      const response = await api.post("/admin/import/users", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
-
-      setSuccess(`Successfully imported ${response.data.successfulImports} students!`);
-      setExcelFile(null);
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to upload Excel file");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        setExcelFile(file);
-        setError("");
-      } else {
-        setError("Please select a valid Excel file (.xlsx or .xls)");
+  useEffect(() => {
+    const loadMeta = async () => {
+      try {
+        const response = await userService.getCreateMeta();
+        setMeta({
+          departments: response.departments || [],
+          semesters: response.semesters || [1, 2, 3, 4, 5, 6, 7, 8],
+        });
+      } catch {
+        setMeta({ departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] });
       }
+    };
+
+    loadMeta();
+    fetchStudents();
+  }, []);
+
+  useEffect(() => {
+    const onOutsideClick = (event) => {
+      if (!showActionMenu) return;
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setShowActionMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onOutsideClick);
+    return () => document.removeEventListener("mousedown", onOutsideClick);
+  }, [showActionMenu]);
+
+  const fetchStudents = async () => {
+    try {
+      setTableLoading(true);
+      const data = await userService.getUsersByRole("STUDENT");
+      setStudents(Array.isArray(data) ? data : []);
+    } catch {
+      setStudents([]);
+      setError("Failed to load students");
+    } finally {
+      setTableLoading(false);
     }
   };
+
+  const handleStatusChange = async (studentId, newStatus) => {
+    // Find the student and store original status for rollback
+    const student = students.find(s => s.id === studentId);
+    const originalStatus = student?.status || "INACTIVE";
+
+    // Update local state immediately (no flash)
+    setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status: newStatus } : s));
+    setStatusUpdating(studentId);
+    
+    try {
+      await userService.updateUser(studentId, { status: newStatus });
+      setSuccess("Status updated successfully!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch (err) {
+      // Rollback on error
+      setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status: originalStatus } : s));
+      setError(err.response?.data?.error || "Failed to update status");
+      setTimeout(() => setError(""), 2000);
+    } finally {
+      setStatusUpdating(null);
+    }
+  };
+
+  const classOptions = useMemo(() => {
+    return Array.from(
+      new Set(students.map((student) => (student.academicYear || "").trim()).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+  }, [students]);
+
+  const filteredStudents = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    return students
+      .filter((student) => {
+        const regNo = (student.registrationNumber || student.studentId || "").toString();
+        const name = (student.fullName || student.name || "").toString();
+        const department = (student.department || "").toString();
+        const classYear = (student.academicYear || "").toString();
+
+        const matchesDepartment = !departmentFilter || department === departmentFilter;
+        const matchesClass = !classFilter || classYear === classFilter;
+        const matchesSearch =
+          !query ||
+          regNo.toLowerCase().includes(query) ||
+          name.toLowerCase().includes(query);
+
+        return matchesDepartment && matchesClass && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (registerSortDirection) {
+          const leftReg = (a.registrationNumber || a.studentId || "").toString();
+          const rightReg = (b.registrationNumber || b.studentId || "").toString();
+          const regCompare = leftReg.localeCompare(rightReg, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+          return registerSortDirection === "asc" ? regCompare : -regCompare;
+        }
+
+        const deptCompare = (a.department || "").localeCompare(b.department || "", undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+        if (deptCompare !== 0) return deptCompare;
+
+        const classCompare = (a.academicYear || "").localeCompare(b.academicYear || "", undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+        if (classCompare !== 0) return classCompare;
+
+        return (a.fullName || a.name || "").localeCompare(b.fullName || b.name || "", undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
+  }, [students, departmentFilter, classFilter, searchTerm, registerSortDirection]);
 
   return (
     <DashboardLayout title="Student Management">
@@ -109,99 +148,167 @@ function StudentManagement() {
         {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
         {success && <div className="success-message" style={{ color: 'green', marginBottom: '10px' }}>{success}</div>}
 
-        <div className="page-actions">
-          <button onClick={() => setShowForm(true)} className="primary-btn">
-            Create Student
-          </button>
+        <div className="table-card" style={{ marginTop: "0.8rem" }}>
+          <h3>Students</h3>
 
-          <button className="secondary-btn">
-            Upload CSV
-          </button>
+          <div className="page-actions course-sort-controls" style={{ gap: "0.6rem", marginBottom: "0.8rem", flexWrap: "wrap" }}>
+            <select className="course-sort-select" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+              <option value="">Department</option>
+              {meta.departments.map((dept) => (
+                <option key={dept.id} value={dept.code || dept.name}>
+                  {dept.code || dept.name}
+                </option>
+              ))}
+            </select>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+            <select className="course-sort-select" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+              <option value="">Class</option>
+              {classOptions.map((value) => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
+
             <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-              id="excel-upload-student"
+              className="course-sort-select"
+              placeholder="Search name or register number"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <label htmlFor="excel-upload-student" className="secondary-btn" style={{ cursor: 'pointer', margin: 0 }}>
-              {excelFile ? excelFile.name : "Upload Excel"}
-            </label>
-            {excelFile && (
-              <button 
-                onClick={handleExcelUpload} 
-                className="primary-btn"
-                disabled={loading}
-              >
-                {loading ? "Uploading..." : "Import"}
-              </button>
-            )}
           </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th
+                  onClick={() => setRegisterSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))}
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Register Number {registerSortDirection === "asc" ? "▲" : registerSortDirection === "desc" ? "▼" : ""}
+                </th>
+                <th>Student Name</th>
+                <th>Department</th>
+                <th>Section</th>
+                <th>Academic Year</th>
+                <th>Semester</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableLoading ? (
+                <tr>
+                  <td colSpan="7">Loading students...</td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan="7">No students found</td>
+                </tr>
+              ) : (
+                filteredStudents.map((student) => (
+                  <tr key={student.id}>
+                    <td>{student.registrationNumber || student.studentId || "-"}</td>
+                    <td>{student.fullName || student.name || "-"}</td>
+                    <td>{student.department || "-"}</td>
+                    <td>{student.section || "-"}</td>
+                    <td>{student.academicYear || "-"}</td>
+                    <td>{student.semester || "-"}</td>
+                    <td>
+                      {(() => {
+                        const currentStatus = student.status || "INACTIVE";
+                        return (
+                          <button
+                            onClick={() => handleStatusChange(student.id, currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
+                            disabled={statusUpdating === student.id}
+                            style={{
+                              padding: "0.35rem 1rem",
+                              borderRadius: "0.25rem",
+                              border: "none",
+                              backgroundColor: currentStatus === "ACTIVE" ? "#4CAF50" : "#ff6b6b",
+                              color: "white",
+                              cursor: statusUpdating === student.id ? "not-allowed" : "pointer",
+                              fontWeight: 600,
+                              fontSize: "0.85rem",
+                              opacity: statusUpdating === student.id ? 0.6 : 1,
+                              transition: "background-color 0.3s ease"
+                            }}
+                          >
+                            {statusUpdating === student.id ? "..." : currentStatus}
+                          </button>
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {showForm && (
-          <div className="form-card">
-            <h3>Create Student Account</h3>
-            <form className="form-grid" onSubmit={handleSubmit}>
-              <input 
-                placeholder="Full Name" 
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                required
-              />
+        <div
+          ref={actionMenuRef}
+          className="course-floating-add"
+          style={{
+            position: "fixed",
+            bottom: "18px",
+            zIndex: 2000,
+          }}
+        >
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => setShowActionMenu((prev) => !prev)}
+            style={{
+              width: "52px",
+              height: "52px",
+              borderRadius: "999px",
+              padding: 0,
+              fontSize: "30px",
+              lineHeight: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+            }}
+          >
+            +
+          </button>
 
-              <input 
-                placeholder="Email" 
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-
-              <input 
-                placeholder="Department" 
-                name="department"
-                value={formData.department}
-                onChange={handleInputChange}
-                required
-              />
-
-              <input 
-                placeholder="Year/Semester" 
-                name="semester"
-                type="number"
-                value={formData.semester}
-                onChange={handleInputChange}
-                required
-              />
-
-              <input 
-                placeholder="Password" 
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-
-              <button type="submit" className="primary-btn" disabled={loading}>
-                {loading ? "Creating..." : "Create Account"}
-              </button>
-              
-              <button 
-                type="button" 
-                className="secondary-btn" 
-                onClick={() => setShowForm(false)}
+          {showActionMenu && (
+            <div
+              className="glass-card course-floating-menu"
+              style={{
+                position: "absolute",
+                bottom: "62px",
+                minWidth: "190px",
+                padding: "0.55rem",
+                zIndex: 2100,
+                display: "grid",
+                gap: "0.45rem",
+              }}
+            >
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => {
+                  navigate("/admin/students/create");
+                  setShowActionMenu(false);
+                }}
               >
-                Cancel
+                Create Student
               </button>
-            </form>
-          </div>
-        )}
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => {
+                  navigate("/admin/students/import");
+                  setShowActionMenu(false);
+                }}
+                disabled={loading}
+              >
+                Import Excel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

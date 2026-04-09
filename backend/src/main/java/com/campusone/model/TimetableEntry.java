@@ -43,6 +43,10 @@ public class TimetableEntry {
     private LocalTime endTime;
 
     private String semester;
+    private String department;
+    private String section;
+    private Integer periodNumber;
+    private String sessionType;
     private Boolean isActive;
 
     private LocalDateTime createdAt;

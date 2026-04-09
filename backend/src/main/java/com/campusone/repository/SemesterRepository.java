@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, Long> {
     Optional<Semester> findBySemesterNumberAndAcademicYear(Integer semesterNumber, String academicYear);
+    List<Semester> findAllBySemesterNumberAndAcademicYearOrderByIdDesc(Integer semesterNumber, String academicYear);
     List<Semester> findByAcademicYear(String academicYear);
     List<Semester> findByIsActive(Boolean isActive);
     Optional<Semester> findByIsActiveTrue();

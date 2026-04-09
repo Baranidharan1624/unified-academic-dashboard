@@ -1,14 +1,5 @@
 function ActivityTable(){
 
-const activities = [
-
-{action:"New student account created",time:"2 minutes ago"},
-{action:"Staff member added",time:"10 minutes ago"},
-{action:"Complaint submitted",time:"1 hour ago"},
-{action:"Announcement posted",time:"Today"}
-
-]
-
 return(
 
 <div className="activity-table">
@@ -25,14 +16,9 @@ return(
 </thead>
 
 <tbody>
-
-{activities.map((item,index)=>(
-<tr key={index}>
-<td>{item.action}</td>
-<td>{item.time}</td>
+<tr>
+<td colspan="2" style={{textAlign: 'center', padding: '20px', color: '#999'}}>No recent activities</td>
 </tr>
-))}
-
 </tbody>
 
 </table>

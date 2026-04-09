@@ -18,6 +18,7 @@ const initialManualForm = {
   semester: "",
   startYear: new Date().getFullYear().toString(),
   credits: "3",
+  type: "THEORY",
 };
 
 function SearchableSortBox({ value, onChange, options, placeholder }) {
@@ -252,6 +253,7 @@ function CourseManagement() {
       courseName: manualForm.courseName,
       courseCode: manualForm.courseCode.trim().toUpperCase(),
       credits: Number(manualForm.credits || 3),
+      type: manualForm.type || "THEORY",
       departmentId: Number(manualForm.departmentId),
       semester: Number(manualForm.semester),
       academicYear,
@@ -334,6 +336,7 @@ function CourseManagement() {
       semester: String(course.semester ?? ""),
       startYear: parsedStartYear,
       credits: String(course.credits ?? 3),
+      type: course.type || "THEORY",
     });
   };
 
@@ -410,12 +413,20 @@ function CourseManagement() {
               />
               <input
                 type="number"
-                min="1"
+                min="0"
                 value={manualForm.credits}
                 onChange={(e) => setManualForm((prev) => ({ ...prev, credits: e.target.value }))}
                 placeholder="Credits"
                 required
               />
+              <select
+                value={manualForm.type}
+                onChange={(e) => setManualForm((prev) => ({ ...prev, type: e.target.value }))}
+                required
+              >
+                <option value="THEORY">Theory</option>
+                <option value="LAB">Lab</option>
+              </select>
               <button className="primary-btn" type="submit" disabled={loading}>
                 {loading ? "Saving..." : editId ? "Update Course" : "Create Course"}
               </button>
@@ -430,6 +441,10 @@ function CourseManagement() {
               <button type="button" className="secondary-btn" onClick={() => setActiveView("table")}>Back to Courses</button>
             </div>
             <h3>Import Courses from Excel</h3>
+            <p style={{ marginTop: "0.5rem", marginBottom: "0.7rem", color: "#6b7280" }}>
+              Required columns: Year, Department, Semester, CourseCode, CourseName, Credits, CourseType.
+              CourseType must be THEORY or LAB.
+            </p>
             <div style={{ marginTop: "0.9rem", display: "inline-flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               <input
                 type="file"

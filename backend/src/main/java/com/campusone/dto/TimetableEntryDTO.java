@@ -33,6 +33,11 @@ public class TimetableEntryDTO {
     
     @NotNull(message = "End time is required")
     private LocalTime endTime;
+    private Integer periodNumber;
+    private String department;
+    private String semester;
+    private String section;
+    private String sessionType;
     private Boolean isActive;
     private String createdAt;
 

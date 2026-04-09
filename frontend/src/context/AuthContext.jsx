@@ -5,52 +5,25 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // Initialize user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser || !token) {
-      setLoading(false);
-      return;
-    }
-
-    let parsedUser = null;
     try {
-      parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-    } catch (e) {
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    } catch {
       localStorage.removeItem("user");
-      setLoading(false);
-      return;
+      setUser(null);
     }
-
-    authService.me()
-      .then((currentUser) => {
-        const normalizedUser = {
-          id: currentUser.userId,
-          email: currentUser.email,
-          role: currentUser.role,
-          name: currentUser.fullName ?? currentUser.name,
-        };
-
-        localStorage.setItem("user", JSON.stringify(normalizedUser));
-        setUser(normalizedUser);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
-  }, [token]);
+    setLoading(false);
+  }, []);
 
   /**
    * Login user with email and password
    */
   const login = useCallback(async (email, password) => {
-    const data = await authService.login(email, password);
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    const data = await authService.login(normalizedEmail, password);
     
     const userData = {
       id: data.userId,
@@ -58,11 +31,7 @@ export function AuthProvider({ children }) {
       role: data.role,
       name: data.fullName ?? data.name,
     };
-    
-    localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(userData));
-    
-    setToken(data.token);
     setUser(userData);
     
     return userData;
@@ -79,13 +48,9 @@ export function AuthProvider({ children }) {
         id: data.userId,
         email: data.email,
         role: data.role,
-        name: data.name,
+        name: data.fullName ?? data.name,
       };
-      
-      localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(user));
-      
-      setToken(data.token);
       setUser(user);
       
       return user;
@@ -98,9 +63,7 @@ export function AuthProvider({ children }) {
    * Logout user and clear authentication data
    */
   const logout = useCallback(() => {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setToken(null);
     setUser(null);
   }, []);
 
@@ -121,7 +84,6 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    token,
     loading,
     login,
     register,

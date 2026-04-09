@@ -5,17 +5,20 @@ export async function login(email, password) {
   const data = response.data;
   const user = {
     id: data.userId,
-    email,
+    email: data.email ?? email,
     role: data.role,
     name: data.fullName,
+    department: data.department,
+    semester: data.semester,
+    section: data.section,
+    studentId: data.studentId,
+    facultyId: data.facultyId,
   };
-  localStorage.setItem("token", data.token);
   localStorage.setItem("user", JSON.stringify(user));
   return user;
 }
 
 export function logout() {
-  localStorage.removeItem("token");
   localStorage.removeItem("user");
 }
 

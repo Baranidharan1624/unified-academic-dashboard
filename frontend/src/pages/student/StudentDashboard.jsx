@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import StatsCard from "../../components/StatsCard";
-import { getCurrentUser } from "../../services/authService";
-import { getStudentDashboard } from "../../services/attendanceService";
+import { getStudentTimetable } from "../../services/timetableService";
 
 function StudentDashboard() {
   const [data, setData] = useState({
@@ -14,21 +13,40 @@ function StudentDashboard() {
 
   useEffect(() => {
     async function load() {
-      const user = getCurrentUser();
       try {
-        const response = await getStudentDashboard(user?.id || 3);
-        setData(response.data);
+        const timetable = await getStudentTimetable();
+        const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+        const todayClasses = timetable.filter((item) => item.dayOfWeek === today);
+
+        setData({
+          attendancePercentage: 0,
+          upcomingClasses: todayClasses,
+          recentAnnouncements: [],
+          pendingTasks: [],
+        });
       } catch {
         setData({
-          attendancePercentage: 88.5,
-          upcomingClasses: [{ id: 1, dayOfWeek: "MONDAY", startTime: "09:00" }],
-          recentAnnouncements: [{ id: 1, title: "Exam Notice" }],
-          pendingTasks: [{ id: 2, taskId: 2 }],
+          attendancePercentage: 0,
+          upcomingClasses: [],
+          recentAnnouncements: [],
+          pendingTasks: [],
         });
       }
     }
 
     load();
+
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
   }, []);
 
   return (
@@ -43,11 +61,15 @@ function StudentDashboard() {
       <div className="module-grid">
         <div className="table-card">
           <h3>Upcoming Classes</h3>
-          <ul>
-            {data.upcomingClasses.map((item) => (
-              <li key={item.id}>{item.dayOfWeek} - {item.startTime}</li>
-            ))}
-          </ul>
+          {data.upcomingClasses.length > 0 ? (
+            <ul>
+              {data.upcomingClasses.map((item) => (
+                <li key={item.id}>{item.dayOfWeek} - {item.startTime} - {item.courseCode}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No classes found for today.</p>
+          )}
         </div>
         <div className="table-card">
           <h3>Recent Announcements</h3>

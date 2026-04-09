@@ -22,13 +22,12 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
-// Request interceptor - attach JWT token
+const clearSessionAndRedirectToLogin = () => {
+  localStorage.removeItem("user");
+};
+
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => {
@@ -39,32 +38,33 @@ apiClient.interceptors.request.use(
 // Response interceptor - handle errors
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
+      const requestUrl = error.config?.url || "";
 
       if (status === 401) {
-        // Unauthorized - clear token and redirect to login
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        window.location.href = "/login";
+        const isAdminUserManagementCall = requestUrl.includes("/admin/users");
+        const isTimetableCall = requestUrl.includes("/timetable");
+
+        const authMessage = data?.message || data?.error || "Unauthorized";
+        console.error("Unauthorized:", authMessage);
+        if (isAdminUserManagementCall || isTimetableCall) {
+          return Promise.reject(error);
+        }
+        clearSessionAndRedirectToLogin();
       } else if (status === 403) {
-        // Forbidden - keep user signed in and surface the access error.
         const accessMessage = data?.message || data?.error || "You don't have permission";
         console.error("Access denied:", accessMessage);
       } else if (status === 404) {
-        // Not found
         console.error("Resource not found:", data?.message);
       } else if (status >= 500) {
-        // Server error
         console.error("Server error:", data?.message || "Internal server error");
       }
     } else if (error.request) {
-      // Request made but no response
       console.error("Network error: No response from server");
     } else {
-      // Error in request setup
       console.error("Request error:", error.message);
     }
     return Promise.reject(error);
@@ -81,4 +81,3 @@ export const api = {
 };
 
 export default apiClient;
-

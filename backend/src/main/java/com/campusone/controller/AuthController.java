@@ -3,17 +3,17 @@ package com.campusone.controller;
 import com.campusone.dto.CreateUserRequest;
 import com.campusone.dto.LoginRequest;
 import com.campusone.dto.LoginResponse;
-import com.campusone.model.User;
 import com.campusone.service.AuthService;
 import com.campusone.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,8 +24,16 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            return ResponseEntity.ok(authService.login(request));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", ex.getMessage()));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid email or password"));
+        }
     }
 
     @PostMapping("/register")
@@ -34,16 +42,4 @@ public class AuthController {
         LoginRequest loginRequest = new LoginRequest(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(authService.login(loginRequest));
     }
-
-    @GetMapping("/me")
-    public ResponseEntity<LoginResponse> me(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
-        return ResponseEntity.ok(LoginResponse.builder()
-                .userId(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .build());
-    }
 }
-

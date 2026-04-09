@@ -91,11 +91,11 @@ function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <p style={{ marginTop: "10px", fontSize: "12px", color: "#94a3b8" }}>
+          Default admin login: admin.ops@campusone.edu / 123
+        </p>
         
-        <div className="login-hints">
-          <p>Demo Accounts:</p>
-          <small>admin.ops@campusone.edu / 123</small>
-        </div>
       </div>
     </div>
   );

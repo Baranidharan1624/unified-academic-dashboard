@@ -40,10 +40,17 @@ function StudentTimetablePage() {
 
   if (loading) return <DashboardLayout title="My Timetable"><div className="loading">Loading timetable...</div></DashboardLayout>;
 
+  const totalEntries = DAYS.reduce((count, day) => count + (timetable[day]?.length || 0), 0);
+
   return (
     <DashboardLayout title="My Class Timetable">
       <div className="timetable-page">
         {error && <div className="alert alert-error">{error}</div>}
+        {!error && totalEntries === 0 && (
+          <div className="alert alert-info">
+            No timetable has been generated for your class yet.
+          </div>
+        )}
         <GlassCard className="timetable-container">
           <h2>My Weekly Schedule</h2>
           <div className="timetable-grid">
@@ -62,7 +69,7 @@ function StudentTimetablePage() {
                         <div className="timetable-entry">
                           <div className="entry-course">{entry.courseName}</div>
                           <div className="entry-code">{entry.courseCode}</div>
-                          <div className="entry-room">{entry.roomName}</div>
+                          <div className="entry-room">{entry.roomNumber || entry.roomName || entry.roomId}</div>
                         </div>
                       )}
                     </div>
@@ -106,6 +113,7 @@ function StudentTimetablePage() {
         .class-count { color: var(--text-secondary); font-size: 0.9rem; }
         .alert { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; }
         .alert-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .alert-info { background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.25); }
         .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
       `}</style>
     </DashboardLayout>

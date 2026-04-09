@@ -23,11 +23,16 @@ public class Room {
     @Column(nullable = false, unique = true)
     private String roomNumber;
 
-    @Column(nullable = false)
     private String building;
 
     private Integer capacity;
-    private String roomType;
+    @Enumerated(EnumType.STRING)
+    private RoomType roomType;
+
+    private String assignedDepartment;
+    private Integer assignedSemester;
+    private String assignedSection;
+    private String assignedCourseCode;
     private Boolean isAvailable;
 
     private LocalDateTime createdAt;
@@ -52,5 +57,9 @@ public class Room {
 
     public void setIsActive(Boolean isActive) {
         this.isAvailable = isActive;
+    }
+
+    public String getType() {
+        return roomType != null ? roomType.name() : null;
     }
 }

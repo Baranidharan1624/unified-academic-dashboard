@@ -307,7 +307,6 @@
 }
 
 @media (min-width: 769px) {
-  .sidebar-overlay,
   .sidebar-close-btn,
   .sidebar-header {
     display: none;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import StatsCard from "../../components/StatsCard";
 import api from "../../services/api";
-import { getCurrentUser } from "../../services/authService";
+import { getFacultyTimetable } from "../../services/timetableService";
 
 function FacultyDashboard() {
   const [todayClasses, setTodayClasses] = useState([]);
@@ -11,23 +11,37 @@ function FacultyDashboard() {
 
   useEffect(() => {
     async function load() {
-      const user = getCurrentUser();
       try {
-        const [timetableRes, tasksRes] = await Promise.all([
-          api.get(`/timetable/faculty/${user?.id || 2}`),
+        const timetable = await getFacultyTimetable();
+        const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+        const classesToday = timetable.filter((item) => item.dayOfWeek === today);
+        const [tasksRes] = await Promise.all([
           api.get("/tasks/course/1"),
         ]);
-        setTodayClasses(timetableRes.data || []);
+        setTodayClasses(classesToday);
         setPendingAssignments(tasksRes.data || []);
         setAttendanceSummary(91.2);
-      } catch {
-        setTodayClasses([{ id: 1, dayOfWeek: "MONDAY", startTime: "09:00", endTime: "10:00", roomNumber: "A-101" }]);
-        setPendingAssignments([{ id: 1, title: "Linked List Assignment" }]);
-        setAttendanceSummary(91.2);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        setTodayClasses([]);
+        setPendingAssignments([]);
+        setAttendanceSummary(0);
       }
     }
 
     load();
+
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
   }, []);
 
   return (

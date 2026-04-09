@@ -23,7 +23,6 @@ class ErrorBoundary extends Component {
   };
 
   handleLogout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "/login";
   };
@@ -94,4 +93,3 @@ class ErrorBoundary extends Component {
 }
 
 export default ErrorBoundary;
-

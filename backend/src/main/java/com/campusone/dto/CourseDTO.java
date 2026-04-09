@@ -22,5 +22,6 @@ public class CourseDTO {
     private String facultyName;
     private Integer semester;
     private String academicYear;
+    private String type;
     private String createdAt;
 }
