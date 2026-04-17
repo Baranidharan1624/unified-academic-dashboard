@@ -56,13 +56,35 @@ public class SecurityConfig {
                 .filter(value -> !value.isBlank())
                 .toList();
         if (origins.isEmpty()) {
-            origins = List.of("*");
+            origins = List.of(
+                    "http://localhost:5173",
+                    "http://127.0.0.1:5173",
+                    "http://10.*.*.*:5173",
+                    "http://192.168.*.*:5173",
+                    "http://172.*.*.*:5173"
+            );
         }
 
-        configuration.setAllowedOriginPatterns(origins);
+        // Use explicit origins for normal entries and patterns only when wildcard is configured.
+        List<String> explicitOrigins = origins.stream()
+                .filter(origin -> !origin.contains("*"))
+                .toList();
+        List<String> patternOrigins = origins.stream()
+                .filter(origin -> origin.contains("*"))
+                .toList();
+
+        if (!explicitOrigins.isEmpty()) {
+            configuration.setAllowedOrigins(explicitOrigins);
+        }
+        if (!patternOrigins.isEmpty()) {
+            configuration.setAllowedOriginPatterns(patternOrigins);
+        }
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

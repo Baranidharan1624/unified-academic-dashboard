@@ -84,7 +84,7 @@ const adminNavItems = [
   { path: '/admin/courses', label: 'Courses', icon: <CourseIcon /> },
   { path: '/admin/timetable', label: 'Timetable', icon: <TimetableIcon /> },
   { path: '/admin/reports', label: 'Reports', icon: <ReportIcon /> },
-  { path: '/admin/notifications', label: 'Notifications', icon: <NotificationIcon />, badge: 3 },
+  { path: '/admin/notifications', label: 'Notifications', icon: <NotificationIcon /> },
 ];
 
 const facultyNavItems = [
@@ -92,7 +92,7 @@ const facultyNavItems = [
   { path: '/faculty/courses', label: 'My Courses', icon: <CourseIcon /> },
   { path: '/faculty/attendance', label: 'Attendance', icon: <AttendanceIcon /> },
   { path: '/faculty/timetable', label: 'Timetable', icon: <TimetableIcon /> },
-  { path: '/faculty/tasks', label: 'Create Task', icon: <TaskIcon />, badge: 2 },
+  { path: '/faculty/tasks', label: 'Create Task', icon: <TaskIcon /> },
   { path: '/faculty/task-submissions', label: 'Submissions', icon: <ReportIcon /> },
 ];
 
@@ -100,8 +100,8 @@ const studentNavItems = [
   { path: '/student/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/student/attendance', label: 'Attendance', icon: <AttendanceIcon /> },
   { path: '/student/timetable', label: 'Timetable', icon: <TimetableIcon /> },
-  { path: '/student/tasks', label: 'Tasks', icon: <TaskIcon />, badge: 4 },
-  { path: '/student/notifications', label: 'Notifications', icon: <NotificationIcon />, badge: 2 },
+  { path: '/student/tasks', label: 'Tasks', icon: <TaskIcon /> },
+  { path: '/student/notifications', label: 'Notifications', icon: <NotificationIcon /> },
 ];
 
 /**
@@ -162,7 +162,6 @@ function Sidebar({ role = 'ADMIN', isOpen = false, onClose }) {
             >
               {item.icon}
               <span>{item.label}</span>
-              {item.badge && <span className="nav-badge">{item.badge}</span>}
             </NavLink>
           ))}
         </nav>

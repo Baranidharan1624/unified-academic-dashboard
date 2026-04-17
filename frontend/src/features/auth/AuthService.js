@@ -25,6 +25,13 @@ export const authService = {
     return response.data;
   },
 
+  async getSessionStatus(userId, email) {
+    const response = await api.get("/auth/session-status", {
+      params: { userId, email },
+    });
+    return response.data;
+  },
+
   /**
    * Logout user - clear local storage
    */

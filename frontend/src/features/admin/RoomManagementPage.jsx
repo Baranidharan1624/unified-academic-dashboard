@@ -3,10 +3,15 @@ import DashboardLayout from '../../components/DashboardLayout';
 import GlassCard from '../../components/ui/GlassCard';
 import Modal from '../../components/ui/Modal';
 import { getRooms, createRoom, deleteRoom } from '../../services/timetableService';
+import { peekCached } from '../../services/apiClient';
+
+const initialRooms = peekCached('/admin/rooms');
 
 function RoomManagementPage() {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [rooms, setRooms] = useState(() => {
+    return Array.isArray(initialRooms) ? initialRooms : [];
+  });
+  const [loading, setLoading] = useState(!Array.isArray(initialRooms));
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     roomName: '',
@@ -17,14 +22,16 @@ function RoomManagementPage() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    loadRooms();
+    if (!Array.isArray(initialRooms)) {
+      loadRooms();
+    }
   }, []);
 
   const loadRooms = async () => {
     try {
       setLoading(true);
       const data = await getRooms();
-      setRooms(data);
+      setRooms(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Failed to load rooms');
     } finally {

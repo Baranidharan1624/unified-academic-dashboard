@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from '../NotificationBell';
+import { clearApiCache } from '../../services/apiClient';
 import '../../assets/css/navbar.css';
 
 function Navbar({ onMenuToggle, title, sidebarOpen = false }) {
@@ -17,6 +18,11 @@ function Navbar({ onMenuToggle, title, sidebarOpen = false }) {
     setDropdownOpen(false);
     logout();
     window.location.href = '/login';
+  };
+
+  const handleReload = () => {
+    clearApiCache();
+    window.location.reload();
   };
 
   // Close dropdown when clicking outside
@@ -55,6 +61,17 @@ function Navbar({ onMenuToggle, title, sidebarOpen = false }) {
         <input type="text" placeholder="Search..." />
       </div>
       <div className="navbar-right">
+        <button
+          type="button"
+          className="navbar-reload-btn"
+          onClick={handleReload}
+          title="Reload"
+          aria-label="Reload site"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992V4.356m-1.5 0a9 9 0 1 0 2.4 9.7" />
+          </svg>
+        </button>
         <NotificationBell />
         <div className="navbar-user" ref={dropdownRef}>
           <div className="user-menu-trigger" onClick={() => setDropdownOpen(!dropdownOpen)}>

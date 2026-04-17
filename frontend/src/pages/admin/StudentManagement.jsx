@@ -2,15 +2,27 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import { userService } from "../../services/userService";
+import { peekCached } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
+
+const initialStudentRows = peekCached("/admin/users?role=STUDENT");
+const initialStudentMeta = peekCached("/admin/users/meta");
 
 function StudentManagement() {
   const [loading, setLoading] = useState(false);
-  const [tableLoading, setTableLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(!Array.isArray(initialStudentRows));
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [meta, setMeta] = useState({ departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] });
-  const [students, setStudents] = useState([]);
+  const [meta, setMeta] = useState(() => {
+    if (initialStudentMeta && typeof initialStudentMeta === "object") {
+      return {
+        departments: initialStudentMeta.departments || [],
+        semesters: initialStudentMeta.semesters || [1, 2, 3, 4, 5, 6, 7, 8],
+      };
+    }
+    return { departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] };
+  });
+  const [students, setStudents] = useState(() => (Array.isArray(initialStudentRows) ? initialStudentRows : []));
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +34,9 @@ function StudentManagement() {
 
   useEffect(() => {
     const loadMeta = async () => {
+      if (initialStudentMeta) {
+        return;
+      }
       try {
         const response = await userService.getCreateMeta();
         setMeta({
@@ -34,7 +49,9 @@ function StudentManagement() {
     };
 
     loadMeta();
-    fetchStudents();
+    if (!Array.isArray(initialStudentRows)) {
+      fetchStudents();
+    }
   }, []);
 
   useEffect(() => {

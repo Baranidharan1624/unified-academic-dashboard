@@ -8,9 +8,11 @@ import com.campusone.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -41,5 +43,15 @@ public class AuthController {
         userService.createUser(request);
         LoginRequest loginRequest = new LoginRequest(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @GetMapping("/session-status")
+    public ResponseEntity<?> sessionStatus(@RequestParam Long userId, @RequestParam String email) {
+        try {
+            return ResponseEntity.ok(authService.getSessionStatus(userId, email));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Session is no longer valid"));
+        }
     }
 }

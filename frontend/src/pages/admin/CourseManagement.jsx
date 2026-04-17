@@ -9,6 +9,7 @@ import {
   importCourses,
   updateCourse,
 } from "../../services/courseService";
+import { peekCached } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
 
 const initialManualForm = {
@@ -104,11 +105,15 @@ function SearchableSortBox({ value, onChange, options, placeholder }) {
 }
 
 function CourseManagement() {
+  const initialCourses = peekCached("/courses");
+  const initialDepartments = peekCached("/admin/courses/departments");
+  const initialSemesters = peekCached("/admin/courses/semesters");
+
   const [activeView, setActiveView] = useState("table");
   const [showActionMenu, setShowActionMenu] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [semesters, setSemesters] = useState([]);
+  const [courses, setCourses] = useState(Array.isArray(initialCourses) ? initialCourses : []);
+  const [departments, setDepartments] = useState(Array.isArray(initialDepartments) ? initialDepartments : []);
+  const [semesters, setSemesters] = useState(Array.isArray(initialSemesters) ? initialSemesters : []);
   const [manualForm, setManualForm] = useState(initialManualForm);
   const [excelFile, setExcelFile] = useState(null);
   const [editId, setEditId] = useState(null);
@@ -125,7 +130,7 @@ function CourseManagement() {
   async function fetchCourses() {
     try {
       const response = await getCourses();
-      setCourses(response.data || []);
+      setCourses(response || []);
     } catch {
       setCourses([]);
     }
@@ -138,8 +143,8 @@ function CourseManagement() {
           getCourseDepartments(),
           getCourseSemesters(),
         ]);
-        setDepartments(deptResponse.data || []);
-        setSemesters(semResponse.data || [1, 2, 3, 4, 5, 6, 7, 8]);
+        setDepartments(deptResponse || []);
+        setSemesters(semResponse || [1, 2, 3, 4, 5, 6, 7, 8]);
       } catch {
         setDepartments([]);
         setSemesters([1, 2, 3, 4, 5, 6, 7, 8]);

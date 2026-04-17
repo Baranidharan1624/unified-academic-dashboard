@@ -1,5 +1,8 @@
 import axios from "axios";
 
+const API_CACHE_PREFIX = "campusone.apiCache.v1";
+const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000;
+
 // Dynamic API base URL - uses current host's IP for LAN access
 const getApiBaseUrl = () => {
   // If explicitly set, use that
@@ -24,6 +27,125 @@ const apiClient = axios.create({
 
 const clearSessionAndRedirectToLogin = () => {
   localStorage.removeItem("user");
+  clearApiCache();
+};
+
+const safeSessionStorage = {
+  getItem(key) {
+    try {
+      return window.sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      window.sessionStorage.setItem(key, value);
+    } catch {
+      // ignore storage failures
+    }
+  },
+  removeItem(key) {
+    try {
+      window.sessionStorage.removeItem(key);
+    } catch {
+      // ignore storage failures
+    }
+  },
+  keys() {
+    try {
+      return Object.keys(window.sessionStorage);
+    } catch {
+      return [];
+    }
+  },
+};
+
+const getCurrentSessionUserKey = () => {
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return "anonymous";
+    const user = JSON.parse(raw);
+    return `${user?.id || "na"}:${user?.role || "na"}`;
+  } catch {
+    return "anonymous";
+  }
+};
+
+const buildCacheKey = (url, params) => {
+  const paramPart = params ? JSON.stringify(params) : "";
+  return `${API_CACHE_PREFIX}:${getCurrentSessionUserKey()}:${url}:${paramPart}`;
+};
+
+const readCache = (key, ttlMs) => {
+  const raw = safeSessionStorage.getItem(key);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      safeSessionStorage.removeItem(key);
+      return null;
+    }
+
+    const age = Date.now() - Number(parsed.timestamp || 0);
+    if (age > ttlMs) {
+      safeSessionStorage.removeItem(key);
+      return null;
+    }
+
+    return parsed.data;
+  } catch {
+    safeSessionStorage.removeItem(key);
+    return null;
+  }
+};
+
+const writeCache = (key, data) => {
+  safeSessionStorage.setItem(
+    key,
+    JSON.stringify({ timestamp: Date.now(), data })
+  );
+};
+
+export const clearApiCache = () => {
+  safeSessionStorage
+    .keys()
+    .filter((key) => key.startsWith(API_CACHE_PREFIX))
+    .forEach((key) => safeSessionStorage.removeItem(key));
+};
+
+export const invalidateApiCacheByPrefix = (prefix) => {
+  safeSessionStorage
+    .keys()
+    .filter((key) => key.startsWith(API_CACHE_PREFIX) && key.includes(`:${prefix}`))
+    .forEach((key) => safeSessionStorage.removeItem(key));
+};
+
+export const getCached = async (url, config = {}, options = {}) => {
+  const ttlMs = Number(options.ttlMs || DEFAULT_CACHE_TTL_MS);
+  const shouldUseCache = options.useCache !== false;
+
+  if (!shouldUseCache) {
+    const response = await apiClient.get(url, config);
+    return response.data;
+  }
+
+  const key = buildCacheKey(url, config?.params);
+  const cached = readCache(key, ttlMs);
+  if (cached != null) {
+    return cached;
+  }
+
+  const response = await apiClient.get(url, config);
+  writeCache(key, response.data);
+  return response.data;
+};
+
+export const peekCached = (url, config = {}, options = {}) => {
+  const ttlMs = Number(options.ttlMs || DEFAULT_CACHE_TTL_MS);
+  const key = buildCacheKey(url, config?.params);
+  return readCache(key, ttlMs);
 };
 
 apiClient.interceptors.request.use(
@@ -78,6 +200,9 @@ export const api = {
   put: (url, data, config = {}) => apiClient.put(url, data, config),
   patch: (url, data, config = {}) => apiClient.patch(url, data, config),
   delete: (url, config = {}) => apiClient.delete(url, config),
+  getCached,
+  clearCache: clearApiCache,
+  invalidateCacheByPrefix: invalidateApiCacheByPrefix,
 };
 
 export default apiClient;

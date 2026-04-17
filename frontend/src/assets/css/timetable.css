@@ -97,6 +97,57 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
+.filter-select option {
+  color: #e5e7eb;
+  background: #111827;
+}
+
+.filter-select option:checked {
+  color: #f8fafc;
+  background: #1f2937;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-input {
+  padding-right: 34px;
+  min-width: 230px;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.search-clear-icon {
+  display: block;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+.search-clear-btn:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+
 .btn-refresh,
 .btn-generate {
   padding: 8px 16px;
@@ -126,6 +177,35 @@
   background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.btn-generate:disabled,
+.btn-create-timetable:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-loading-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-inline-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Timetable Grid */
@@ -756,4 +836,339 @@
   .manual-entry-panel {
     padding: 15px;
   }
+}
+
+/* ------------------------------------------------------------
+   Timetable Visual Refresh (v2)
+   ------------------------------------------------------------ */
+
+.timetable-container {
+  background:
+    radial-gradient(1200px 380px at -10% -20%, rgba(56, 189, 248, 0.22), transparent 45%),
+    radial-gradient(900px 320px at 110% 0%, rgba(99, 102, 241, 0.24), transparent 42%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(10, 18, 34, 0.96) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.45);
+}
+
+.timetable-controls {
+  background: rgba(15, 23, 42, 0.56);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.filter-group {
+  gap: 10px;
+}
+
+.filter-select {
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  font-weight: 500;
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.filter-select:hover {
+  border-color: rgba(56, 189, 248, 0.7);
+  background: rgba(30, 41, 59, 0.95);
+}
+
+.filter-select:focus {
+  border-color: rgba(56, 189, 248, 0.95);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+/* Force readable native dropdown menu colors across browsers */
+select.filter-select,
+select.filter-select:focus,
+select.filter-select:active {
+  color: #e2e8f0;
+  background-color: rgba(15, 23, 42, 0.92);
+}
+
+select.filter-select option,
+select.filter-select option:checked,
+select.filter-select option:hover,
+select.filter-select option:focus {
+  color: #e5e7eb !important;
+  background-color: #111827 !important;
+}
+
+.btn-refresh,
+.btn-generate,
+.btn-create-timetable,
+.btn-back-sections,
+.timetable-generation-container .btn-submit {
+  min-height: 40px;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.btn-refresh {
+  border-color: rgba(148, 163, 184, 0.32);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.btn-refresh:hover {
+  border-color: rgba(56, 189, 248, 0.65);
+  background: rgba(51, 65, 85, 0.95);
+}
+
+.btn-generate,
+.btn-create-timetable,
+.timetable-generation-container .btn-submit {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #4f46e5 100%);
+  border: 1px solid rgba(125, 211, 252, 0.25);
+}
+
+.btn-generate:hover:not(:disabled),
+.btn-create-timetable:hover,
+.timetable-generation-container .btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.4);
+}
+
+.search-input-wrapper {
+  min-width: 280px;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(2, 6, 23, 0.72);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.search-clear-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #f8fafc;
+}
+
+.search-clear-btn:hover {
+  background: rgba(71, 85, 105, 0.85);
+}
+
+.section-cards-panel {
+  margin-top: 20px;
+}
+
+.section-cards-grid {
+  gap: 14px;
+}
+
+.section-card {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.74) 100%),
+    radial-gradient(240px 120px at 110% -30%, rgba(56, 189, 248, 0.14), transparent 65%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.3);
+}
+
+.section-card:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 12px 26px rgba(14, 165, 233, 0.2);
+}
+
+.section-card-title {
+  color: #f8fafc;
+}
+
+.section-card-meta {
+  color: #cbd5e1;
+}
+
+.timetable-grid-wrapper {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.35);
+}
+
+.timetable-grid {
+  background: rgba(100, 116, 139, 0.28);
+}
+
+.timetable-header > div {
+  background: linear-gradient(180deg, #1d4ed8 0%, #4338ca 100%);
+}
+
+.period-time {
+  background: rgba(2, 6, 23, 0.92);
+}
+
+.period-num {
+  color: #7dd3fc;
+}
+
+.timetable-cell {
+  background: rgba(15, 23, 42, 0.94);
+}
+
+.timetable-cell:hover {
+  background: rgba(30, 41, 59, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.4);
+}
+
+.cell-content {
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(59, 130, 246, 0.2) 0%, rgba(79, 70, 229, 0.14) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+}
+
+.course-name {
+  color: #f8fafc;
+  font-size: 12px;
+}
+
+.faculty-name {
+  color: #dbeafe;
+}
+
+.room-info {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+}
+
+.no-data-message {
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+}
+
+.generation-panel,
+.manual-entry-panel {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(10, 18, 34, 0.9) 100%);
+}
+
+.info-box {
+  border-left: 4px solid #0ea5e9;
+  background: rgba(2, 6, 23, 0.5);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.student-table-wrapper {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.32);
+}
+
+.student-timetable-table th {
+  background: linear-gradient(180deg, #1d4ed8 0%, #4338ca 100%);
+}
+
+.student-period-cell {
+  background: rgba(15, 23, 42, 0.94);
+}
+
+.student-entry-card {
+  background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%);
+}
+
+@media (max-width: 768px) {
+  .search-input-wrapper {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
+
+/* Student timetable specific layout */
+.student-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: var(--radius-md);
+  background: rgba(2, 6, 23, 0.9);
+}
+
+.student-timetable-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.student-timetable-table th {
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 12px;
+  padding: 12px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.student-time-header {
+  width: 130px;
+}
+
+.student-time-cell {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 8px;
+}
+
+.student-period-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+.student-period-range {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.student-period-cell {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(30, 41, 59, 0.96);
+  height: 94px;
+  vertical-align: top;
+  padding: 6px;
+}
+
+.student-entry-card {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.student-entry-course {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.student-entry-faculty {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.student-entry-room {
+  font-size: 11px;
+  opacity: 0.95;
+  font-weight: 600;
 }

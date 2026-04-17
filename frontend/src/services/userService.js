@@ -4,8 +4,7 @@ import { api } from "./apiClient";
  * Get faculty users
  */
 export async function getFacultyUsers() {
-  const response = await api.get("/admin/users?role=FACULTY");
-  return response.data;
+  return api.getCached("/admin/users?role=FACULTY");
 }
 
 /**
@@ -17,13 +16,11 @@ export const userService = {
    * @returns {Promise} List of all users
    */
   async getUsers() {
-    const response = await api.get("/admin/users");
-    return response.data;
+    return api.getCached("/admin/users");
   },
 
   async getCreateMeta() {
-    const response = await api.get("/admin/users/meta");
-    return response.data;
+    return api.getCached("/admin/users/meta");
   },
 
   /**
@@ -32,8 +29,7 @@ export const userService = {
    * @returns {Promise} List of users with specified role
    */
   async getUsersByRole(role) {
-    const response = await api.get(`/admin/users?role=${role}`);
-    return response.data;
+    return api.getCached(`/admin/users?role=${role}`);
   },
 
   /**
@@ -42,8 +38,7 @@ export const userService = {
    * @returns {Promise} User details
    */
   async getUserById(id) {
-    const response = await api.get(`/admin/users/${id}`);
-    return response.data;
+    return api.getCached(`/admin/users/${id}`);
   },
 
   /**
@@ -53,6 +48,7 @@ export const userService = {
    */
   async createUser(userData) {
     const response = await api.post("/admin/users", userData);
+    api.invalidateCacheByPrefix("/admin/users");
     return response.data;
   },
 
@@ -64,6 +60,7 @@ export const userService = {
    */
   async updateUser(id, userData) {
     const response = await api.put(`/admin/users/${id}`, userData);
+    api.invalidateCacheByPrefix("/admin/users");
     return response.data;
   },
 
@@ -74,6 +71,7 @@ export const userService = {
    */
   async activateUser(id) {
     const response = await api.patch(`/admin/users/${id}/activate`);
+    api.invalidateCacheByPrefix("/admin/users");
     return response.data;
   },
 
@@ -84,6 +82,7 @@ export const userService = {
    */
   async deactivateUser(id) {
     const response = await api.patch(`/admin/users/${id}/deactivate`);
+    api.invalidateCacheByPrefix("/admin/users");
     return response.data;
   },
 
@@ -97,6 +96,7 @@ export const userService = {
     const response = await api.post(`/admin/users/${id}/reset-password`, {
       newPassword,
     });
+    api.invalidateCacheByPrefix("/admin/users");
     return response.data;
   },
 
@@ -106,8 +106,8 @@ export const userService = {
    * @returns {Promise} Boolean indicating if email exists
    */
   async checkEmailExists(email) {
-    const response = await api.get(`/admin/users/check-email?email=${email}`);
-    return response.data.exists;
+    const data = await api.getCached(`/admin/users/check-email?email=${email}`, {}, { ttlMs: 60 * 1000 });
+    return data.exists;
   },
 
   /**
@@ -116,8 +116,8 @@ export const userService = {
    * @returns {Promise} Count of users
    */
   async getUserCountByRole(role) {
-    const response = await api.get(`/admin/users/count?role=${role}`);
-    return response.data.count;
+    const data = await api.getCached(`/admin/users/count?role=${role}`);
+    return data.count;
   },
 };
 

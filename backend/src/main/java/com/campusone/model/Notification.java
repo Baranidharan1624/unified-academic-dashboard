@@ -27,8 +27,24 @@ public class Notification {
     private String message;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role targetRole;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TargetType targetType;
+
+    @Column(name = "target_department")
+    private String targetDepartment;
+
+    @Column(name = "target_academic_year")
+    private String targetAcademicYear;
+
+    @Column(name = "target_section")
+    private String targetSection;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationPriority priority;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
@@ -52,9 +68,23 @@ public class Notification {
         return targetRole != null ? targetRole.name() : null;
     }
 
+    public String getTargetTypeName() {
+        return targetType != null ? targetType.name() : null;
+    }
+
+    public String getPriorityName() {
+        return priority != null ? priority.name() : null;
+    }
+
     @PrePersist
     void onCreate() {
         createdAt = LocalDateTime.now();
+        if (targetType == null) {
+            targetType = TargetType.ROLE;
+        }
+        if (priority == null) {
+            priority = NotificationPriority.MEDIUM;
+        }
     }
 
     public enum NotificationType {
@@ -63,5 +93,16 @@ public class Notification {
         ATTENDANCE,
         GRADE,
         GENERAL
+    }
+
+    public enum TargetType {
+        ROLE,
+        ALL
+    }
+
+    public enum NotificationPriority {
+        LOW,
+        MEDIUM,
+        HIGH
     }
 }

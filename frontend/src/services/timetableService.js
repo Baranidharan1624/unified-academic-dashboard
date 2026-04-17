@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { api, getCached, invalidateApiCacheByPrefix } from './apiClient';
 
 const getCurrentUserId = () => {
   try {
@@ -13,68 +13,76 @@ const getCurrentUserId = () => {
 
 // Room Services
 export const getRooms = async () => {
-  const response = await apiClient.get('/admin/rooms');
-  return response.data;
+  return getCached('/admin/rooms');
 };
 
 export const getRoomById = async (id) => {
-  const response = await apiClient.get(`/admin/rooms/${id}`);
-  return response.data;
+  return getCached(`/admin/rooms/${id}`);
 };
 
 export const createRoom = async (roomData) => {
-  const response = await apiClient.post('/admin/rooms', roomData);
+  const response = await api.post('/admin/rooms', roomData);
+  invalidateApiCacheByPrefix('/admin/rooms');
   return response.data;
 };
 
 export const deleteRoom = async (id) => {
-  const response = await apiClient.delete(`/admin/rooms/${id}`);
+  const response = await api.delete(`/admin/rooms/${id}`);
+  invalidateApiCacheByPrefix('/admin/rooms');
   return response.data;
 };
 
 // Timetable Services
 export const getTimetableEntries = async () => {
-  const response = await apiClient.get('/admin/timetable');
-  return response.data;
+  return getCached('/admin/timetable');
 };
 
 export const getTimetableEntryById = async (id) => {
-  const response = await apiClient.get(`/admin/timetable/${id}`);
-  return response.data;
+  return getCached(`/admin/timetable/${id}`);
 };
 
 export const createTimetableEntry = async (entryData) => {
-  const response = await apiClient.post('/admin/timetable', entryData);
+  const response = await api.post('/admin/timetable', entryData);
+  invalidateApiCacheByPrefix('/admin/timetable');
+  invalidateApiCacheByPrefix('/timetable/student/');
+  invalidateApiCacheByPrefix('/timetable/faculty/');
   return response.data;
 };
 
 export const updateTimetableEntry = async (id, entryData) => {
-  const response = await apiClient.put(`/admin/timetable/${id}`, entryData);
+  const response = await api.put(`/admin/timetable/${id}`, entryData);
+  invalidateApiCacheByPrefix('/admin/timetable');
+  invalidateApiCacheByPrefix('/timetable/student/');
+  invalidateApiCacheByPrefix('/timetable/faculty/');
   return response.data;
 };
 
 export const deleteTimetableEntry = async (id) => {
-  const response = await apiClient.delete(`/admin/timetable/${id}`);
+  const response = await api.delete(`/admin/timetable/${id}`);
+  invalidateApiCacheByPrefix('/admin/timetable');
+  invalidateApiCacheByPrefix('/timetable/student/');
+  invalidateApiCacheByPrefix('/timetable/faculty/');
   return response.data;
 };
 
 export const generateAutomaticTimetable = async () => {
-  const response = await apiClient.post('/admin/timetable/generate');
+  const response = await api.post('/admin/timetable/generate');
+  invalidateApiCacheByPrefix('/admin/timetable');
+  invalidateApiCacheByPrefix('/timetable/student/');
+  invalidateApiCacheByPrefix('/timetable/faculty/');
   return response.data;
 };
 
 // Faculty Timetable
 export const getFacultyTimetable = async () => {
   const userId = getCurrentUserId();
-  const response = await apiClient.get(`/timetable/faculty/${userId || 0}`);
-  return response.data;
+  return getCached(`/timetable/faculty/${userId || 0}`);
 };
 
 // Student Timetable
 export const getStudentTimetable = async () => {
   const userId = getCurrentUserId();
-  const response = await apiClient.get(`/timetable/student/${userId || 0}`);
-  return response.data;
+  return getCached(`/timetable/student/${userId || 0}`);
 };
 
 // Helper to organize timetable by day

@@ -2,15 +2,27 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import { userService } from "../../services/userService";
+import { peekCached } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
+
+const initialFacultyRows = peekCached("/admin/users?role=FACULTY");
+const initialFacultyMeta = peekCached("/admin/users/meta");
 
 function FacultyManagement() {
   const [loading, setLoading] = useState(false);
-  const [tableLoading, setTableLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(!Array.isArray(initialFacultyRows));
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [meta, setMeta] = useState({ departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] });
-  const [faculty, setFaculty] = useState([]);
+  const [meta, setMeta] = useState(() => {
+    if (initialFacultyMeta && typeof initialFacultyMeta === "object") {
+      return {
+        departments: initialFacultyMeta.departments || [],
+        semesters: initialFacultyMeta.semesters || [1, 2, 3, 4, 5, 6, 7, 8],
+      };
+    }
+    return { departments: [], semesters: [1, 2, 3, 4, 5, 6, 7, 8] };
+  });
+  const [faculty, setFaculty] = useState(() => (Array.isArray(initialFacultyRows) ? initialFacultyRows : []));
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [facultyIdSortDirection, setFacultyIdSortDirection] = useState(null);
@@ -21,6 +33,9 @@ function FacultyManagement() {
 
   useEffect(() => {
     const loadMeta = async () => {
+      if (initialFacultyMeta) {
+        return;
+      }
       try {
         const response = await userService.getCreateMeta();
         setMeta({
@@ -33,7 +48,9 @@ function FacultyManagement() {
     };
 
     loadMeta();
-    fetchFaculty();
+    if (!Array.isArray(initialFacultyRows)) {
+      fetchFaculty();
+    }
   }, []);
 
   useEffect(() => {

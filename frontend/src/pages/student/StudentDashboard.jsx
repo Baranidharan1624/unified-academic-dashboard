@@ -3,6 +3,43 @@ import DashboardLayout from "../../components/DashboardLayout";
 import StatsCard from "../../components/StatsCard";
 import { getStudentTimetable } from "../../services/timetableService";
 
+const PERIOD_FROM_TIME = {
+  "08:00": 1,
+  "08:50": 2,
+  "10:10": 3,
+  "11:00": 4,
+  "11:50": 5,
+  "13:30": 6,
+  "14:15": 7,
+};
+
+const resolvePeriodNumber = (entry) => {
+  const period = Number(entry?.periodNumber);
+  if (!Number.isNaN(period) && period >= 1 && period <= 7) {
+    return period;
+  }
+
+  const start = String(entry?.startTime || "").slice(0, 5);
+  return PERIOD_FROM_TIME[start] ?? 999;
+};
+
+const getUniqueTodayClasses = (entries, today) => {
+  const seen = new Set();
+
+  return entries
+    .filter((item) => item.dayOfWeek === today)
+    .sort((a, b) => resolvePeriodNumber(a) - resolvePeriodNumber(b))
+    .filter((item) => {
+      const period = resolvePeriodNumber(item);
+      const key = `${item.dayOfWeek}|${period}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+};
+
 function StudentDashboard() {
   const [data, setData] = useState({
     attendancePercentage: 0,
@@ -16,7 +53,7 @@ function StudentDashboard() {
       try {
         const timetable = await getStudentTimetable();
         const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
-        const todayClasses = timetable.filter((item) => item.dayOfWeek === today);
+        const todayClasses = getUniqueTodayClasses(timetable, today);
 
         setData({
           attendancePercentage: 0,
@@ -64,7 +101,9 @@ function StudentDashboard() {
           {data.upcomingClasses.length > 0 ? (
             <ul>
               {data.upcomingClasses.map((item) => (
-                <li key={item.id}>{item.dayOfWeek} - {item.startTime} - {item.courseCode}</li>
+                <li key={`${item.dayOfWeek}-${resolvePeriodNumber(item)}-${item.courseCode}`}>
+                  {item.dayOfWeek} - {String(item.startTime || "").slice(0, 5)} - {item.courseCode}
+                </li>
               ))}
             </ul>
           ) : (

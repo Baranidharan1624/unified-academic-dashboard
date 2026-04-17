@@ -2,26 +2,30 @@ import { useEffect, useMemo, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
 import DashboardLayout from "../../components/DashboardLayout";
-import api from "../../services/api";
+import { getCached, peekCached } from "../../services/apiClient";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 function Reports() {
-  const [users, setUsers] = useState({ totalStudents: 0, totalFaculty: 0, totalAdmins: 0 });
-  const [attendance, setAttendance] = useState({ overallAttendancePercentage: 0 });
-  const [system, setSystem] = useState({ totalCourses: 0, totalTaskSubmissions: 0 });
+  const [users, setUsers] = useState(() => peekCached("/reports/users") || { totalStudents: 0, totalFaculty: 0, totalAdmins: 0 });
+  const [attendance, setAttendance] = useState(() => peekCached("/reports/attendance") || { overallAttendancePercentage: 0 });
+  const [system, setSystem] = useState(() => peekCached("/reports/system-activity") || { totalCourses: 0, totalTaskSubmissions: 0 });
 
   useEffect(() => {
+    if (peekCached("/reports/users") && peekCached("/reports/attendance") && peekCached("/reports/system-activity")) {
+      return;
+    }
+
     async function load() {
       try {
         const [usersRes, attendanceRes, systemRes] = await Promise.all([
-          api.get("/reports/users"),
-          api.get("/reports/attendance"),
-          api.get("/reports/system-activity"),
+          getCached("/reports/users"),
+          getCached("/reports/attendance"),
+          getCached("/reports/system-activity"),
         ]);
-        setUsers(usersRes.data);
-        setAttendance(attendanceRes.data);
-        setSystem(systemRes.data);
+        setUsers(usersRes);
+        setAttendance(attendanceRes);
+        setSystem(systemRes);
       } catch {
         setUsers({ totalStudents: 0, totalFaculty: 0, totalAdmins: 0 });
         setAttendance({ overallAttendancePercentage: 0 });

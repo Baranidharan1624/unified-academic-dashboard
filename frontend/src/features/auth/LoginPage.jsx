@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/images/logo.png";
 import "../../assets/css/login.css";
+
+const LOGOUT_REASON_KEY = "logoutReason";
 
 /**
  * LoginPage - Glassmorphism styled login page
@@ -10,11 +13,20 @@ import "../../assets/css/login.css";
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const reason = localStorage.getItem(LOGOUT_REASON_KEY);
+    if (reason) {
+      setError(reason);
+      localStorage.removeItem(LOGOUT_REASON_KEY);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,15 +89,30 @@ function LoginPage() {
           />
 
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={loading}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <span>👁️</span>
+              ) : (
+                <span>👁️‍🗨️</span>
+              )}
+            </button>
+          </div>
 
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}

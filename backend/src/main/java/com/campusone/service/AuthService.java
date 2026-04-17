@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -39,6 +40,24 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    public Map<String, Object> getSessionStatus(Long userId, String email) {
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Guard against stale/forged local session values.
+        if (!normalizeEmail(user.getEmail()).equals(normalizedEmail)) {
+            throw new RuntimeException("Session identity mismatch");
+        }
+
+        boolean active = user.getStatus() == UserStatus.ACTIVE;
+        return Map.of(
+                "active", active,
+                "status", user.getStatus() == null ? "UNKNOWN" : user.getStatus().name(),
+                "message", active ? "ACTIVE" : "Your account is inactive. Please contact admin."
+        );
     }
 
     private String normalizeEmail(String email) {

@@ -17,7 +17,7 @@ return(
 
 <tbody>
 <tr>
-<td colspan="2" style={{textAlign: 'center', padding: '20px', color: '#999'}}>No recent activities</td>
+<td colSpan="2" style={{textAlign: 'center', padding: '20px', color: '#999'}}>No recent activities</td>
 </tr>
 </tbody>
 

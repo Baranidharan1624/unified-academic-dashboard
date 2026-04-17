@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import {
   createTimetableEntry,
-  generateAutomaticTimetable,
   getTimetableEntries,
   getRooms,
 } from "../../services/timetableService";
+import { peekCached } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
 import "../../assets/css/timetable.css";
 
@@ -149,9 +150,16 @@ const buildRoomAwareClassCards = (entries, rooms) => {
 };
 
 function TimetableGenerationPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("generate");
-  const [generatedData, setGeneratedData] = useState([]);
-  const [roomData, setRoomData] = useState([]);
+  const [generatedData, setGeneratedData] = useState(() => {
+    const cached = peekCached("/admin/timetable");
+    return Array.isArray(cached) ? cached : [];
+  });
+  const [roomData, setRoomData] = useState(() => {
+    const cached = peekCached("/admin/rooms");
+    return Array.isArray(cached) ? cached : [];
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -194,18 +202,17 @@ function TimetableGenerationPage() {
     setSuccess("");
 
     try {
-      const generated = await generateAutomaticTimetable();
-      const entries = Array.isArray(generated) ? generated : [];
+      const entries = await getTimetableEntries();
       setGeneratedData(entries);
       const rooms = await getRooms();
       setRoomData(Array.isArray(rooms) ? rooms : []);
       setSelectedClassKey("");
-      setSuccess("Timetable generated successfully. Select a class card to view the full timetable.");
+      setSuccess("Loaded existing timetable from database. Select a class card to view the full timetable.");
     } catch (err) {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Failed to generate timetable"
+          "Failed to load timetable"
       );
     } finally {
       setLoading(false);
@@ -340,7 +347,25 @@ function TimetableGenerationPage() {
     <DashboardLayout title="Timetable Management">
       <div className="timetable-generation-container">
         <div className="generation-header">
-          <h2>Generate / Create Timetable</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Generate / Create Timetable</h2>
+            <button
+              type="button"
+              className="btn-submit"
+              onClick={() => navigate("/admin/timetable")}
+              style={{ width: "auto" }}
+            >
+              Back to Timetable
+            </button>
+          </div>
         </div>
 
         <div className="tab-switcher">
@@ -371,19 +396,17 @@ function TimetableGenerationPage() {
         {activeTab === "generate" && (
           <div className="generation-panel">
             <div className="info-box">
-              <h3>Automatic Timetable Generation</h3>
+              <h3>Timetable Data View</h3>
               <p>
-                This will automatically generate a conflict-free timetable for all
-                departments, semesters, and sections based on:
+                Auto generation is disabled. This section only loads existing
+                timetable entries already stored in the database:
               </p>
               <ul>
-                <li>Course assignments (Theory & Lab)</li>
-                <li>Faculty availability</li>
-                <li>Room/Lab availability</li>
-                <li>Time slot constraints</li>
-                <li>Lab duration (2 continuous periods)</li>
+                <li>Section-wise timetable entries</li>
+                <li>Faculty and room mappings</li>
+                <li>Seeded/imported periods from backend DB</li>
               </ul>
-              <p className="warning">This will overwrite any existing timetable entries.</p>
+              <p className="warning">No overwrite happens from this button.</p>
             </div>
 
             <button
@@ -391,7 +414,7 @@ function TimetableGenerationPage() {
               onClick={handleGenerateAutomatic}
               disabled={loading}
             >
-              {loading ? "Generating..." : "Generate Timetable"}
+              {loading ? "Loading..." : "Load Existing Timetable"}
             </button>
 
             {generatedData.length > 0 && (

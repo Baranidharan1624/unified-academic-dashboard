@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import { authService } from "../features/auth/AuthService";
 
 const AuthContext = createContext(null);
+const LOGOUT_REASON_KEY = "logoutReason";
+const STATUS_POLL_INTERVAL_MS = 10000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -67,6 +69,45 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const forceLogout = useCallback((reason) => {
+    if (reason) {
+      localStorage.setItem(LOGOUT_REASON_KEY, reason);
+    }
+    logout();
+  }, [logout]);
+
+  useEffect(() => {
+    if (!user?.id || !user?.email) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const verifySessionStatus = async () => {
+      try {
+        const status = await authService.getSessionStatus(user.id, user.email);
+        if (cancelled) return;
+
+        if (!status?.active) {
+          forceLogout(status?.message || "Your account is inactive. Please contact admin.");
+        }
+      } catch (error) {
+        if (cancelled) return;
+
+        const message = error?.response?.data?.message || "Session is no longer valid";
+        forceLogout(message);
+      }
+    };
+
+    verifySessionStatus();
+    const intervalId = window.setInterval(verifySessionStatus, STATUS_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [user, forceLogout]);
+
   /**
    * Check if user has a specific role
    */
@@ -88,6 +129,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    forceLogout,
     hasRole,
     isAdmin,
     isFaculty,

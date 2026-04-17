@@ -25,15 +25,13 @@ import TaskSubmissions from "../pages/faculty/TaskSubmissions";
 
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentAttendance from "../pages/student/StudentAttendance";
-import StudentTimetable from "../pages/student/StudentTimetable";
+import StudentTimetablePage from "../features/student/StudentTimetablePage";
 import StudentTasks from "../pages/student/StudentTasks";
 import StudentNotifications from "../pages/student/StudentNotifications";
 
-// New Feature Pages
+// Admin Feature Pages
 import RoomManagementPage from "../features/admin/RoomManagementPage";
 import TimetableManagementPage from "../features/admin/TimetableManagementPage";
-import FacultyTimetablePage from "../features/faculty/FacultyTimetablePage";
-import StudentTimetablePage from "../features/student/StudentTimetablePage";
 import BulkUserImportPage from "../features/admin/BulkUserImportPage";
 
 function AppRouter() {
@@ -67,15 +65,13 @@ function AppRouter() {
         <Route path="/faculty/attendance" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><Attendance /></ProtectedRoute>} />
         <Route path="/faculty/courses" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><MyCourses /></ProtectedRoute>} />
         <Route path="/faculty/timetable" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><FacultyTimetable /></ProtectedRoute>} />
-        <Route path="/faculty/timetable-new" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><FacultyTimetablePage /></ProtectedRoute>} />
         <Route path="/faculty/tasks" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><CreateTask /></ProtectedRoute>} />
         <Route path="/faculty/task-submissions" element={<ProtectedRoute allowedRoles={["FACULTY", "ADMIN"]}><TaskSubmissions /></ProtectedRoute>} />
 
         {/* Student Routes */}
         <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentDashboard /></ProtectedRoute>} />
         <Route path="/student/attendance" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentAttendance /></ProtectedRoute>} />
-        <Route path="/student/timetable" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentTimetable /></ProtectedRoute>} />
-        <Route path="/student/timetable-new" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentTimetablePage /></ProtectedRoute>} />
+        <Route path="/student/timetable" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentTimetablePage /></ProtectedRoute>} />
         <Route path="/student/tasks" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentTasks /></ProtectedRoute>} />
         <Route path="/student/notifications" element={<ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}><StudentNotifications /></ProtectedRoute>} />
 

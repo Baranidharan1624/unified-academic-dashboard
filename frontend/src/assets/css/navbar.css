@@ -100,6 +100,36 @@
   gap: 20px;
 }
 
+.navbar-reload-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.7);
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-reload-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.navbar-reload-btn:hover {
+  color: #f8fafc;
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(30, 41, 59, 0.9);
+  transform: rotate(-18deg);
+}
+
+.navbar-reload-btn:active {
+  transform: scale(0.96);
+}
+
 /* Notification */
 .notification-wrapper {
   position: relative;

@@ -2,31 +2,40 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import StatsCard from "../../components/StatsCard";
 import ActivityTable from "../../components/ActivityTable";
-import api from "../../services/api";
+import { peekCached, getCached } from "../../services/apiClient";
+
+const initialDashboard = peekCached("/admin/dashboard") || {};
+const initialUsersReport = peekCached("/reports/users") || {};
+const initialAttendanceReport = peekCached("/reports/attendance") || {};
+const initialActivityReport = peekCached("/reports/system-activity") || {};
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalStudents: 0,
-    totalFaculty: 0,
-    totalCourses: 0,
-    attendancePercentage: 0,
+    totalStudents: initialUsersReport.totalStudents ?? initialDashboard.totalStudents ?? 0,
+    totalFaculty: initialUsersReport.totalFaculty ?? initialDashboard.totalFaculty ?? 0,
+    totalCourses: initialActivityReport.totalCourses ?? 0,
+    attendancePercentage: initialAttendanceReport.overallAttendancePercentage ?? 0,
   });
 
   useEffect(() => {
+    if (peekCached("/admin/dashboard") && peekCached("/reports/users") && peekCached("/reports/attendance") && peekCached("/reports/system-activity")) {
+      return;
+    }
+
     async function loadStats() {
       try {
         const [dashboardRes, usersReportRes, attendanceRes, activityRes] = await Promise.all([
-          api.get("/admin/dashboard"),
-          api.get("/reports/users"),
-          api.get("/reports/attendance"),
-          api.get("/reports/system-activity"),
+          getCached("/admin/dashboard"),
+          getCached("/reports/users"),
+          getCached("/reports/attendance"),
+          getCached("/reports/system-activity"),
         ]);
 
         setStats({
-          totalStudents: usersReportRes.data.totalStudents ?? dashboardRes.data.totalStudents ?? 0,
-          totalFaculty: usersReportRes.data.totalFaculty ?? dashboardRes.data.totalFaculty ?? 0,
-          totalCourses: activityRes.data.totalCourses ?? 0,
-          attendancePercentage: attendanceRes.data.overallAttendancePercentage ?? 0,
+          totalStudents: usersReportRes.totalStudents ?? dashboardRes.totalStudents ?? 0,
+          totalFaculty: usersReportRes.totalFaculty ?? dashboardRes.totalFaculty ?? 0,
+          totalCourses: activityRes.totalCourses ?? 0,
+          attendancePercentage: attendanceRes.overallAttendancePercentage ?? 0,
         });
       } catch {
         setStats({ totalStudents: 0, totalFaculty: 0, totalCourses: 0, attendancePercentage: 0 });

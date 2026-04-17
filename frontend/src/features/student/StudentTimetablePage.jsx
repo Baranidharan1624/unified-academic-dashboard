@@ -1,50 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import GlassCard from '../../components/ui/GlassCard';
-import { getStudentTimetable, organizeTimetableByDay } from '../../services/timetableService';
+import { getStudentTimetable } from '../../services/timetableService';
+import { peekCached } from '../../services/apiClient';
+import '../../assets/css/timetable.css';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 const DAY_LABELS = { MONDAY: 'Monday', TUESDAY: 'Tuesday', WEDNESDAY: 'Wednesday', THURSDAY: 'Thursday', FRIDAY: 'Friday' };
+const PERIODS = [
+  { period: 1, start: '08:00', end: '08:50' },
+  { period: 2, start: '08:50', end: '09:40' },
+  { period: 3, start: '10:10', end: '11:00' },
+  { period: 4, start: '11:00', end: '11:50' },
+  { period: 5, start: '11:50', end: '12:40' },
+  { period: 6, start: '13:30', end: '14:15' },
+  { period: 7, start: '14:15', end: '15:00' },
+];
+
+const PERIOD_FROM_TIME = {
+  '08:00': 1,
+  '08:50': 2,
+  '10:10': 3,
+  '11:00': 4,
+  '11:50': 5,
+  '13:30': 6,
+  '14:15': 7,
+};
+
+const resolvePeriodNumber = (entry) => {
+  const fromPeriod = Number(entry?.periodNumber);
+  if (!Number.isNaN(fromPeriod) && fromPeriod >= 1 && fromPeriod <= 7) {
+    return fromPeriod;
+  }
+
+  const start = String(entry?.startTime || '').slice(0, 5);
+  return PERIOD_FROM_TIME[start] ?? null;
+};
+
+const getCurrentUserId = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+};
 
 function StudentTimetablePage() {
-  const [timetable, setTimetable] = useState({});
-  const [loading, setLoading] = useState(true);
+  const initialCachedEntries = (() => {
+    const userId = getCurrentUserId();
+    const cached = peekCached(`/timetable/student/${userId || 0}`);
+    return cached === null ? null : Array.isArray(cached) ? cached : [];
+  })();
+
+  const [entries, setEntries] = useState(initialCachedEntries ?? []);
+  const [loading, setLoading] = useState(initialCachedEntries === null);
   const [error, setError] = useState('');
 
-  useEffect(() => { loadTimetable(); }, []);
+  useEffect(() => {
+    if (loading) {
+      loadTimetable();
+    }
+  }, []);
 
   const loadTimetable = async () => {
     try {
       setLoading(true);
       const data = await getStudentTimetable();
-      setTimetable(organizeTimetableByDay(data));
-    } catch (err) { setError('Failed to load timetable'); }
+      setEntries(Array.isArray(data) ? data : []);
+      setError('');
+    } catch (err) {
+      setError('Failed to load timetable');
+    }
     finally { setLoading(false); }
   };
 
-  const renderTimeSlots = () => {
-    const slots = [];
-    for (let hour = 8; hour <= 17; hour++) slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    return slots;
-  };
-
-  const getEntryAtTime = (day, time) => {
-    const entries = timetable[day] || [];
-    return entries.find(entry => {
-      const start = parseInt(entry.startTime.split(':')[0]);
-      const end = parseInt(entry.endTime.split(':')[0]);
-      const current = parseInt(time.split(':')[0]);
-      return current >= start && current < end;
+  const timetableBySlot = useMemo(() => {
+    const grid = {};
+    DAYS.forEach((day) => {
+      grid[day] = {};
     });
-  };
+
+    entries.forEach((entry) => {
+      const day = entry?.dayOfWeek;
+      const period = resolvePeriodNumber(entry);
+      if (!day || !grid[day] || !period) {
+        return;
+      }
+
+      // Keep the first row per day/period to avoid duplicate stacked cards.
+      if (!grid[day][period]) {
+        grid[day][period] = entry;
+      }
+    });
+
+    return grid;
+  }, [entries]);
+
+  const totalEntries = useMemo(
+    () => DAYS.reduce((count, day) => count + Object.keys(timetableBySlot[day] || {}).length, 0),
+    [timetableBySlot]
+  );
 
   if (loading) return <DashboardLayout title="My Timetable"><div className="loading">Loading timetable...</div></DashboardLayout>;
 
-  const totalEntries = DAYS.reduce((count, day) => count + (timetable[day]?.length || 0), 0);
-
   return (
     <DashboardLayout title="My Class Timetable">
-      <div className="timetable-page">
+      <div className="timetable-page student-timetable-page">
         {error && <div className="alert alert-error">{error}</div>}
         {!error && totalEntries === 0 && (
           <div className="alert alert-info">
@@ -53,30 +117,41 @@ function StudentTimetablePage() {
         )}
         <GlassCard className="timetable-container">
           <h2>My Weekly Schedule</h2>
-          <div className="timetable-grid">
-            <div className="timetable-header">
-              <div className="time-column">Time</div>
-              {DAYS.map(day => <div key={day} className="day-column">{DAY_LABELS[day]}</div>)}
-            </div>
-            {renderTimeSlots().map(time => (
-              <div key={time} className="timetable-row">
-                <div className="time-cell">{time}</div>
-                {DAYS.map(day => {
-                  const entry = getEntryAtTime(day, time);
-                  return (
-                    <div key={`${day}-${time}`} className="timetable-cell">
-                      {entry && parseInt(entry.startTime.split(':')[0]) === parseInt(time.split(':')[0]) && (
-                        <div className="timetable-entry">
-                          <div className="entry-course">{entry.courseName}</div>
-                          <div className="entry-code">{entry.courseCode}</div>
-                          <div className="entry-room">{entry.roomNumber || entry.roomName || entry.roomId}</div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+          <div className="student-table-wrapper">
+            <table className="student-timetable-table">
+              <thead>
+                <tr>
+                  <th className="student-time-header">Time</th>
+                  {DAYS.map((day) => (
+                    <th key={day}>{DAY_LABELS[day]}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PERIODS.map((period) => (
+                  <tr key={period.period}>
+                    <td className="student-time-cell">
+                      <div className="student-period-label">P{period.period}</div>
+                      <div className="student-period-range">{period.start} - {period.end}</div>
+                    </td>
+                    {DAYS.map((day) => {
+                      const entry = timetableBySlot[day]?.[period.period];
+                      return (
+                        <td key={`${day}-${period.period}`} className="student-period-cell">
+                          {entry && (
+                            <div className="student-entry-card">
+                              <div className="student-entry-course">{entry.courseName || entry.courseCode || 'Course'}</div>
+                              <div className="student-entry-faculty">{entry.facultyName || 'Faculty'}</div>
+                              <div className="student-entry-room">{entry.roomNumber || entry.roomName || `Room ${entry.roomId || '-'}`}</div>
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </GlassCard>
         
@@ -86,36 +161,12 @@ function StudentTimetablePage() {
             {DAYS.map(day => (
               <div key={day} className="summary-day">
                 <div className="day-name">{DAY_LABELS[day]}</div>
-                <div className="class-count">{timetable[day]?.length || 0} classes</div>
+                <div className="class-count">{Object.keys(timetableBySlot[day] || {}).length} periods</div>
               </div>
             ))}
           </div>
         </GlassCard>
       </div>
-      <style>{`
-        .timetable-page { padding: 20px; }
-        .timetable-container { overflow-x: auto; margin-bottom: 20px; }
-        .timetable-container h2 { margin-bottom: 20px; color: var(--primary-color); }
-        .timetable-grid { display: flex; flex-direction: column; min-width: 800px; }
-        .timetable-header { display: grid; grid-template-columns: 80px repeat(5, 1fr); background: var(--primary-color); color: white; font-weight: bold; }
-        .timetable-header .time-column, .timetable-header .day-column { padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-        .timetable-row { display: grid; grid-template-columns: 80px repeat(5, 1fr); min-height: 50px; }
-        .time-cell { padding: 8px; text-align: center; background: var(--bg-secondary); border: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-secondary); }
-        .timetable-cell { border: 1px solid var(--border-color); min-height: 50px; position: relative; }
-        .timetable-entry { position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; }
-        .entry-course { font-weight: bold; font-size: 0.85rem; }
-        .entry-code { opacity: 0.9; font-size: 0.75rem; }
-        .entry-room { opacity: 0.8; font-size: 0.7rem; margin-top: 2px; }
-        .schedule-summary h3 { margin-bottom: 15px; color: var(--primary-color); }
-        .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-        .summary-day { text-align: center; padding: 15px; background: var(--bg-secondary); border-radius: 8px; }
-        .day-name { font-weight: bold; margin-bottom: 5px; }
-        .class-count { color: var(--text-secondary); font-size: 0.9rem; }
-        .alert { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .alert-info { background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.25); }
-        .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
-      `}</style>
     </DashboardLayout>
   );
 }

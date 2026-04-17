@@ -2,14 +2,20 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import userService from "../../services/userService";
+import { peekCached } from "../../services/apiClient";
 import "../../assets/css/dashboard.css";
+
+const initialUsersCache = peekCached("/admin/users");
+const initialMetaCache = peekCached("/admin/users/meta");
 
 /**
  * UserListPage - Admin user management list view
  */
 function UserListPage() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(() => {
+    return Array.isArray(initialUsersCache) ? initialUsersCache : [];
+  });
+  const [loading, setLoading] = useState(!Array.isArray(initialUsersCache));
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -21,7 +27,9 @@ function UserListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadUsers();
+    if (!Array.isArray(initialUsersCache)) {
+      loadUsers();
+    }
   }, [roleFilter]);
 
   const loadUsers = async () => {
@@ -30,7 +38,7 @@ function UserListPage() {
       const data = roleFilter
         ? await userService.getUsersByRole(roleFilter)
         : await userService.getUsers();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Failed to load users");
       console.error(err);

@@ -23,8 +23,28 @@ public class NotificationRequest {
     @Size(min = 5, message = "Message must be at least 5 characters")
     private String message;
 
-    @NotNull(message = "Target role is required")
+    private TargetType targetType = TargetType.ROLE;
+
     private Role targetRole;
 
+    private String targetDepartment;
+
+    private String targetAcademicYear;
+
+    private String targetSection;
+
+    private Priority priority = Priority.MEDIUM;
+
     private Long createdBy;
+
+    public enum TargetType {
+        ROLE,
+        ALL
+    }
+
+    public enum Priority {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
 }

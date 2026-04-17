@@ -11,6 +11,12 @@ import {
 } from '../../services/timetableService';
 import { getCourseOfferings } from '../../services/courseService';
 import { getFacultyUsers } from '../../services/userService';
+import { peekCached } from '../../services/apiClient';
+
+const initialTimetableEntries = peekCached('/admin/timetable');
+const initialRoomsCache = peekCached('/admin/rooms');
+const initialOfferingsCache = peekCached('/admin/course-offerings');
+const initialFacultyCache = peekCached('/admin/users?role=FACULTY');
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 const TIME_SLOTS = [
@@ -19,11 +25,24 @@ const TIME_SLOTS = [
 ];
 
 function TimetableManagementPage() {
-  const [entries, setEntries] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [courseOfferings, setCourseOfferings] = useState([]);
-  const [faculty, setFaculty] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState(() => {
+    return Array.isArray(initialTimetableEntries) ? initialTimetableEntries : [];
+  });
+  const [rooms, setRooms] = useState(() => {
+    return Array.isArray(initialRoomsCache) ? initialRoomsCache : [];
+  });
+  const [courseOfferings, setCourseOfferings] = useState(() => {
+    return Array.isArray(initialOfferingsCache) ? initialOfferingsCache : [];
+  });
+  const [faculty, setFaculty] = useState(() => {
+    return Array.isArray(initialFacultyCache) ? initialFacultyCache : [];
+  });
+  const [loading, setLoading] = useState(
+    !Array.isArray(initialTimetableEntries) ||
+    !Array.isArray(initialRoomsCache) ||
+    !Array.isArray(initialOfferingsCache) ||
+    !Array.isArray(initialFacultyCache)
+  );
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -38,7 +57,9 @@ function TimetableManagementPage() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    loadData();
+    if (loading) {
+      loadData();
+    }
   }, []);
 
   const loadData = async () => {
